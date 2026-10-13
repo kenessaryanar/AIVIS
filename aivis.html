@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Иллюстратор знаний</title>
+<style>
+:root{
+  --bg:#FFFFFF;--bg2:#F2F5F9;--card:#FFFFFF;--ink:#1A1F26;--muted:#566170;--line:#D3DAE4;
+  --pri:#0D47A1;--pri-ink:#FFFFFF;--pri-soft:#E3EDFB;
+  --ok:#2E7D32;--ok-soft:#E4F3E5;--bad:#C62828;--bad-soft:#FBE6E6;--warn:#7A5200;--warn-soft:#FFF3D1;
+  --font:"Segoe UI",Roboto,"Helvetica Neue",Arial,system-ui,sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151C;--bg2:#171E27;--card:#1B2430;--ink:#E9EEF4;--muted:#A3AFBD;--line:#2F3B4A;
+    --pri:#6AB0FF;--pri-ink:#08121F;--pri-soft:#1B2F4A;
+    --ok:#6CC070;--ok-soft:#173019;--bad:#F08080;--bad-soft:#3A1C1E;--warn:#F2C14E;--warn-soft:#382D10;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151C;--bg2:#171E27;--card:#1B2430;--ink:#E9EEF4;--muted:#A3AFBD;--line:#2F3B4A;
+  --pri:#6AB0FF;--pri-ink:#08121F;--pri-soft:#1B2F4A;
+  --ok:#6CC070;--ok-soft:#173019;--bad:#F08080;--bad-soft:#3A1C1E;--warn:#F2C14E;--warn-soft:#382D10;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg);font-size:clamp(16px,.9rem + .35vw,19px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.6}
+button,select,textarea,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+[id]{scroll-margin-top:5.5rem}
+.wrap{width:100%;max-width:62rem;margin:0 auto;padding:0 clamp(.75rem,3vw,1.5rem)}
+.skip{position:absolute;left:-999px;top:.5rem;background:var(--pri);color:var(--pri-ink);padding:.5rem .9rem;border-radius:.4rem;z-index:99}
+.skip:focus{left:.5rem}
+
+/* header */
+.top{background:var(--pri);color:var(--pri-ink)}
+:root[data-theme="dark"] .top{background:var(--bg2);color:var(--ink);border-bottom:1px solid var(--line)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .top{background:var(--bg2);color:var(--ink);border-bottom:1px solid var(--line)}}
+.top .wrap{display:flex;flex-wrap:wrap;gap:.75rem 1rem;align-items:center;justify-content:space-between;padding-top:clamp(.75rem,2vw,1.1rem);padding-bottom:clamp(.75rem,2vw,1.1rem)}
+.top h1{margin:0;font-size:clamp(1.25rem,1rem + 1.4vw,2rem);line-height:1.2}
+.top p{margin:.15rem 0 0;font-size:clamp(.85rem,.8rem + .2vw,1rem);opacity:.9}
+.ctl{display:flex;gap:.5rem;align-items:center}
+.seg{display:flex;border:2px solid currentColor;border-radius:.5rem;overflow:hidden}
+.seg button{border:0;background:transparent;color:inherit;padding:.35rem .7rem;min-height:2.5rem;cursor:pointer;font-weight:700}
+.seg button+button{border-left:2px solid currentColor}
+.seg button[aria-pressed="true"]{background:var(--pri-ink);color:var(--pri)}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:var(--pri);color:var(--pri-ink)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"]{background:var(--pri);color:var(--pri-ink)}}
+.ibtn{width:2.75rem;height:2.5rem;border:2px solid currentColor;background:transparent;color:inherit;border-radius:.5rem;cursor:pointer;display:grid;place-items:center}
+
+/* tabs */
+.tabsbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:2px solid var(--line)}
+.tabs{display:flex;gap:.25rem;overflow-x:auto;scrollbar-width:thin}
+.tab{flex:none;border:0;background:none;padding:.8rem clamp(.7rem,2vw,1.1rem);cursor:pointer;font-weight:700;color:var(--muted);border-bottom:4px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--pri);border-bottom-color:var(--pri)}
+.tab .n{display:inline-grid;place-items:center;width:1.5rem;height:1.5rem;border-radius:50%;border:2px solid currentColor;font-size:.8rem;margin-right:.45rem}
+
+main{padding:clamp(1rem,3vw,2rem) 0 3rem}
+h2{font-size:clamp(1.4rem,1.1rem + 1.2vw,2rem);line-height:1.25;margin:0 0 .75rem;color:var(--pri)}
+h3{font-size:clamp(1.1rem,1rem + .5vw,1.35rem);line-height:1.3;margin:1.8rem 0 .6rem}
+h4{font-size:1rem;margin:1rem 0 .3rem}
+p{margin:0 0 .8rem;max-width:70ch}
+.muted{color:var(--muted)}
+.instr{background:var(--pri-soft);border:1px solid var(--pri);border-left-width:6px;border-radius:.5rem;padding:.9rem 1.1rem;margin:0 0 1.6rem}
+.instr b{display:block;margin-bottom:.3rem;color:var(--pri)}
+.instr ol{margin:0;padding-left:1.3rem}
+.instr li{margin:.2rem 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:.6rem;padding:1rem 1.15rem;margin:0 0 1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:1rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border:2px solid var(--pri);background:var(--card);color:var(--pri);border-radius:.5rem;padding:.45rem .9rem;min-height:2.6rem;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{background:var(--pri-soft)}
+.btn.pri{background:var(--pri);color:var(--pri-ink)}
+.btn.pri:hover{filter:brightness(1.1)}
+.btn.sm{min-height:2.2rem;padding:.25rem .7rem;font-size:.9rem}
+.btns{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1rem}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:.3rem .95rem;min-height:2.4rem;cursor:pointer;font-weight:600}
+.chip:hover{border-color:var(--pri)}
+.chip[aria-pressed="true"]{background:var(--pri);border-color:var(--pri);color:var(--pri-ink)}
+.badge{display:inline-block;background:var(--pri-soft);color:var(--pri);border-radius:.4rem;padding:.05rem .55rem;font-size:.85rem;font-weight:700}
+.pr{white-space:pre-wrap;word-break:break-word;background:var(--bg2);border:1px solid var(--line);border-left:5px solid var(--pri);border-radius:.4rem;padding:.8rem 1rem;margin:.4rem 0;font-size:.93rem;line-height:1.55}
+.src{background:var(--bg2);border:1px solid var(--line);border-radius:.4rem;padding:.8rem 1rem;margin:.4rem 0;max-width:none}
+progress{width:100%;max-width:22rem;height:.8rem;accent-color:var(--pri)}
+
+/* details */
+details{border:1px solid var(--line);border-radius:.6rem;background:var(--card);margin:0 0 .75rem}
+summary{cursor:pointer;padding:.75rem 1rem;font-weight:700;display:flex;flex-wrap:wrap;gap:.4rem .8rem;align-items:center;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸";color:var(--pri);transition:transform .15s}
+details[open]>summary::before{transform:rotate(90deg)}
+details>.body{padding:0 1rem 1rem}
+.cat{margin:1.8rem 0 .6rem;font-size:1.15rem;border-bottom:2px solid var(--pri);padding-bottom:.25rem}
+
+/* steps */
+.steps{list-style:none;margin:1rem 0;padding:0;counter-reset:s}
+.steps li{display:grid;grid-template-columns:2.4rem minmax(0,1fr);gap:.8rem;padding:.8rem 0;border-top:1px solid var(--line)}
+.steps li:first-child{border-top:0}
+.steps .num{width:2.2rem;height:2.2rem;border-radius:50%;background:var(--pri);color:var(--pri-ink);display:grid;place-items:center;font-weight:700}
+.steps li.done .num{background:var(--ok);color:#fff}
+.steps h4{margin:.1rem 0 .2rem}
+.steps p{margin:0 0 .3rem}
+.chk{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;font-size:.95rem;color:var(--muted)}
+.chk input{width:1.2rem;height:1.2rem;accent-color:var(--pri)}
+.list{margin:.3rem 0 1rem;padding-left:1.3rem;max-width:70ch}
+.list li{margin:.3rem 0}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:30rem}
+th,td{border:1px solid var(--line);padding:.5rem .7rem;text-align:left;vertical-align:top}
+th{background:var(--pri-soft);color:var(--pri)}
+
+/* ai links */
+.ai{background:var(--bg2);border:1px solid var(--line);border-radius:.6rem;padding:1rem 1.15rem;margin:1.2rem 0}
+.ai h3{margin-top:0}
+.ai a{color:var(--pri);font-weight:700}
+.ai ul{margin:.3rem 0 .8rem;padding-left:1.2rem}
+.ai li{margin:.3rem 0}
+.note{background:var(--warn-soft);border-left:5px solid var(--warn);color:var(--ink);padding:.6rem .9rem;border-radius:.3rem;font-size:.92rem;max-width:70ch}
+
+/* forms */
+textarea,select{width:100%;max-width:44rem;border:2px solid var(--line);background:var(--card);border-radius:.5rem;padding:.55rem .7rem;display:block}
+textarea{min-height:6rem;resize:vertical}
+label.q{display:block;font-weight:700;margin:1rem 0 .3rem}
+.scale{display:flex;gap:.4rem;flex-wrap:wrap;margin:.2rem 0 .6rem}
+.scale button{width:2.8rem;height:2.8rem;border-radius:.5rem;border:2px solid var(--line);background:var(--card);cursor:pointer;font-weight:700}
+.scale button[aria-checked="true"]{background:var(--pri);color:var(--pri-ink);border-color:var(--pri)}
+.match{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 5rem;gap:.6rem;align-items:center;padding:.5rem 0;border-top:1px solid var(--line)}
+.match select{max-width:none}
+.ok{color:var(--ok);font-weight:700}.bad{color:var(--bad);font-weight:700}
+.pager{display:flex;justify-content:space-between;gap:.6rem;margin-top:2rem;flex-wrap:wrap}
+#toast{position:fixed;left:50%;bottom:calc(1.2rem + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:.5rem 1.1rem;border-radius:999px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:80;max-width:90vw}
+#toast.show{opacity:1}
+iframe.form{width:100%;height:38rem;border:1px solid var(--line);border-radius:.5rem;background:#fff}
+@media (max-width:640px){
+  .match{grid-template-columns:1fr}
+  .seg button{padding:.35rem .5rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<!-- ============================================================
+  НАСТРОЙКА ОПРОСА / SURVEY SETUP / САУАЛНАМА БАПТАУЫ
+  Вставьте ссылку на вашу форму Google (или другую) между кавычками.
+  Paste the link to your Google Form (or similar) between the quotes.
+  Мысалы / Example: "https://docs.google.com/forms/d/e/XXXXXXXX/viewform"
+============================================================ -->
+<script id="config">window.SURVEY_URL="";</script>
+
+<a class="skip" id="skip" href="#main"></a>
+<header class="top">
+  <div class="wrap">
+    <div><h1 id="hTitle"></h1><p id="hSub"></p></div>
+    <div class="ctl">
+      <div class="seg" id="langSeg" role="group">
+        <button type="button" data-act="lang" data-l="kk" lang="kk" title="Қазақша">ҚАЗ</button>
+        <button type="button" data-act="lang" data-l="ru" lang="ru" title="Русский">РУС</button>
+        <button type="button" data-act="lang" data-l="en" lang="en" title="English">ENG</button>
+      </div>
+      <button type="button" class="ibtn" id="themeBtn" data-act="theme"></button>
+    </div>
+  </div>
+</header>
+<div class="tabsbar"><div class="wrap"><nav class="tabs" id="tabs" role="tablist"></nav></div></div>
+<main id="main" tabindex="-1"><div class="wrap" id="view"></div></main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+var TABS=["basics","situations","usage","better","review"];
+var CATS={lang:["eng","rus","kaz"],nat:["math","geo","bio","chem","phys"],art:["art","pe","mus","dom"]};
+
+/* ======================= VIZ DICTIONARY ======================= */
+var VIZ={
+flow:{ru:{n:"блок-схема",b:"показать последовательность шагов или решений (алгоритм)",f:"код блок-схемы Mermaid в блоке ```mermaid (его можно вставить в mermaid.live) и краткая легенда"},
+ kk:{n:"блок-схема",b:"қадамдар немесе шешімдер тізбегін (алгоритмді) көрсету",f:"```mermaid блогындағы Mermaid блок-схема коды (оны mermaid.live-қа қоюға болады) және қысқа түсіндірме"},
+ en:{n:"flowchart",b:"showing a sequence of steps or decisions (an algorithm)",f:"Mermaid flowchart code in a ```mermaid block (it can be pasted into mermaid.live) and a short legend"}},
+table:{ru:{n:"сравнительная таблица",b:"сравнить несколько объектов по одним и тем же параметрам",f:"таблица Markdown, первый столбец – параметры"},
+ kk:{n:"салыстырмалы кесте",b:"бірнеше нысанды бірдей параметрлер бойынша салыстыру",f:"Markdown кестесі, бірінші бағанда параметрлер"},
+ en:{n:"comparison table",b:"comparing several objects by the same parameters",f:"a Markdown table with parameters in the first column"}},
+timeline:{ru:{n:"временная линия",b:"показать порядок событий или этапов во времени",f:"код временной линии Mermaid в блоке ```mermaid и краткая легенда"},
+ kk:{n:"уақыт сызығы",b:"оқиғалар мен кезеңдердің уақыт бойынша ретін көрсету",f:"```mermaid блогындағы Mermaid уақыт сызығының коды және қысқа түсіндірме"},
+ en:{n:"timeline",b:"showing the order of events or stages in time",f:"Mermaid timeline code in a ```mermaid block and a short legend"}},
+map:{ru:{n:"карта понятий",b:"показать иерархию и связи между понятиями",f:"код ментальной карты Mermaid (mindmap) в блоке ```mermaid"},
+ kk:{n:"ұғымдар картасы",b:"ұғымдардың иерархиясы мен өзара байланысын көрсету",f:"```mermaid блогындағы Mermaid mindmap коды"},
+ en:{n:"concept map",b:"showing the hierarchy and connections between concepts",f:"Mermaid mindmap code in a ```mermaid block"}},
+cycle:{ru:{n:"циклическая схема",b:"показать процесс, который возвращается к началу",f:"код блок-схемы Mermaid с замкнутым циклом в блоке ```mermaid"},
+ kk:{n:"циклдік схема",b:"бастапқы нүктеге қайта оралатын үдерісті көрсету",f:"```mermaid блогындағы тұйық циклі бар Mermaid блок-схема коды"},
+ en:{n:"cycle diagram",b:"showing a process that returns to its starting point",f:"Mermaid flowchart code with a closed loop in a ```mermaid block"}},
+chart:{ru:{n:"диаграмма (столбчатая или линейная)",b:"показать величины, доли или изменения чисел",f:"таблица значений и одностраничный HTML-файл с диаграммой на inline SVG"},
+ kk:{n:"диаграмма (бағанды немесе сызықты)",b:"шамаларды, үлестерді немесе сандардың өзгерісін көрсету",f:"мәндер кестесі және inline SVG диаграммасы бар бір беттік HTML-файл"},
+ en:{n:"chart (bar or line)",b:"showing quantities, shares or changes in numbers",f:"a table of values and a single-file HTML page with an inline SVG chart"}},
+infographic:{ru:{n:"инфографика",b:"подать пошаговую идею или набор фактов в одной наглядной картинке",f:"одностраничный HTML-файл с инфографикой на CSS и inline SVG"},
+ kk:{n:"инфографика",b:"қадамдық идеяны немесе фактілер жиынтығын бір көрнекі суретте беру",f:"CSS және inline SVG негізіндегі инфографикасы бар бір беттік HTML-файл"},
+ en:{n:"infographic",b:"presenting a step-by-step idea or a set of facts in one clear picture",f:"a single-file HTML page with an infographic made of CSS and inline SVG"}},
+labeled:{ru:{n:"подписанный рисунок",b:"назвать части объекта",f:"один inline SVG с пронумерованными подписями и легендой"},
+ kk:{n:"белгіленген сурет",b:"нысан бөліктерін атау",f:"нөмірленген жазулары мен түсіндірмесі бар бір inline SVG"},
+ en:{n:"labeled diagram",b:"naming the parts of an object",f:"one inline SVG with numbered labels and a legend"}},
+model3d:{ru:{n:"3D-модель",b:"показать пространственное строение объекта",f:"одностраничный HTML-файл с интерактивной 3D-сценой (Three.js с cdnjs) и кликабельными подписями; если это невозможно – пошаговый план сборки модели из простых фигур"},
+ kk:{n:"3D-модель",b:"нысанның кеңістіктік құрылымын көрсету",f:"интерактивті 3D-сахнасы бар бір беттік HTML-файл (cdnjs-тегі Three.js) және басуға болатын жазулар; егер мүмкін болмаса – қарапайым пішіндерден модель құрудың қадамдық жоспары"},
+ en:{n:"3D model",b:"showing the spatial structure of an object",f:"a single-file HTML page with an interactive 3D scene (Three.js from cdnjs) and clickable labels; if that is impossible, a step-by-step plan for building the model from simple shapes"}},
+slides:{ru:{n:"презентация",b:"пошагово провести учеников по теме, сопровождая каждый слайд визуальным образом",f:"план по слайдам: заголовок, до трёх коротких тезисов и описание визуального образа"},
+ kk:{n:"презентация",b:"оқушыларды тақырып бойынша қадам-қадаммен жүргізу, әр слайдқа көрнекі бейне қосу",f:"слайдтар бойынша жоспар: тақырып, үшке дейін қысқа тезис және көрнекі бейне сипаттамасы"},
+ en:{n:"presentation",b:"walking students through a topic step by step with a visual on every slide",f:"a slide-by-slide outline: slide title, up to three short bullets and a description of the visual"}},
+venn:{ru:{n:"диаграмма Венна",b:"показать общее и различия между объектами",f:"один inline SVG с двумя пересекающимися кругами и короткими списками в каждой области"},
+ kk:{n:"Венн диаграммасы",b:"нысандардың ортақ белгілері мен айырмашылықтарын көрсету",f:"әр аймақта қысқа тізімі бар екі қиылысатын шеңбері бар бір inline SVG"},
+ en:{n:"Venn diagram",b:"showing what objects have in common and how they differ",f:"one inline SVG with two overlapping circles and short lists in each area"}}
+};
+var VKEYS=["flow","table","timeline","map","cycle","chart","infographic","labeled","model3d","slides","venn"];
+
+/* ======================= SUBJECTS ======================= */
+var SUBJ=[
+{id:"eng",tv:"timeline",sv:"table",
+ru:{n:"Английский язык",s:"Шестиклассники путают Present Perfect и Past Simple: правило было объяснено двумя абзацами текста, но в тесте ученики выбирают форму «на слух». Как помочь им увидеть разницу, а не заучивать её?",
+x:"Past Simple и Present Perfect говорят о прошлом, но отвечают на разные вопросы. Past Simple описывает завершённое действие в конкретное время: «I visited London in 2019». Маркеры: yesterday, last year, in 2019, ago. Present Perfect (have/has + третья форма глагола) связывает прошлое с настоящим: «I have visited London three times». Точное время не важно, важны результат или опыт. Маркеры: ever, never, already, yet, just, so far. Сравните: «She lost her keys yesterday» (Past Simple – факт в прошлом) и «She has lost her keys» (ключей до сих пор нет).",
+g:"6–7 класс (12–13 лет)",f:"две формы на одной оси времени: где находится действие и какую связь с настоящим оно имеет, по одному примеру и маркерам для каждой формы",d:"Не более 6–8 элементов, без исключений и редких форм; используй только то, что есть в тексте."},
+kk:{n:"Ағылшын тілі",s:"6-сынып оқушылары Present Perfect пен Past Simple-ді шатастырады: ереже екі абзац мәтінмен түсіндірілді, бірақ тестте олар форманы «құлақ сезімімен» таңдайды. Айырмашылықты жаттатпай, көзбен көруге қалай көмектесуге болады?",
+x:"Past Simple және Present Perfect өткен шақ туралы айтады, бірақ әртүрлі сұрақтарға жауап береді. Past Simple нақты уақытта аяқталған әрекетті сипаттайды: «I visited London in 2019». Белгілері: yesterday, last year, in 2019, ago. Present Perfect (have/has + етістіктің үшінші формасы) өткенді қазіргімен байланыстырады: «I have visited London three times». Нақты уақыт маңызды емес, нәтиже немесе тәжірибе маңызды. Белгілері: ever, never, already, yet, just, so far. Салыстырыңыз: «She lost her keys yesterday» (Past Simple – өткендегі факт) және «She has lost her keys» (кілттер әлі жоқ).",
+g:"6–7-сынып (12–13 жас)",f:"бір уақыт осінде екі форма: әрекет қай жерде орналасқанын және қазіргімен қандай байланысы барын, әр форма үшін бір мысал мен белгілерін",d:"6–8 элементтен аспасын, ерекшеліктер мен сирек формаларсыз; тек мәтіндегі мәліметті пайдалан."},
+en:{n:"English language",s:"Seventh graders mix up Present Perfect and Past Simple: the rule was explained in two paragraphs of text, yet on the test they pick a form ‘by ear’. How can they be helped to see the difference instead of memorizing it?",
+x:"Past Simple and Present Perfect both talk about the past, but they answer different questions. Past Simple describes a finished action at a definite time: “I visited London in 2019.” Markers: yesterday, last year, in 2019, ago. Present Perfect (have/has + past participle) links the past to the present: “I have visited London three times.” The exact time is not important; the result or experience is. Markers: ever, never, already, yet, just, so far. Compare: “She lost her keys yesterday” (Past Simple – a fact in the past) and “She has lost her keys” (she still cannot find them).",
+g:"Grades 6–7 (ages 12–13)",f:"both forms on one time axis: where the action sits and how it connects to the present, with one example and the time markers for each form",d:"No more than 6–8 elements, no exceptions or rare forms; use only what is in the text."}},
+
+{id:"rus",tv:"map",sv:"flow",
+ru:{n:"Русский язык",s:"Пятиклассники определяют часть речи слова наугад, потому что помнят лишь список названий. Как дать им пошаговый путь рассуждения: «Отвечает на вопрос? Называет предмет, признак или действие?»",
+x:"В русском языке части речи делятся на самостоятельные и служебные. Самостоятельные части речи называют предметы, признаки, количество и действия, отвечают на вопросы и являются членами предложения: имя существительное, имя прилагательное, имя числительное, местоимение, глагол, наречие. Служебные части речи – предлог, союз, частица – не называют предметов и признаков, не отвечают на вопросы и не бывают членами предложения: они связывают слова или добавляют оттенки значения. Междометие стоит особняком: оно выражает чувства, но не называет их. Причастие и деепричастие считают особыми формами глагола.",
+g:"5 класс (10–11 лет)",f:"иерархию: части речи → самостоятельные и служебные → конкретные части речи с вопросом и примером",d:"Не более трёх уровней вложенности, по одному короткому примеру на часть речи, без редких классификаций."},
+kk:{n:"Орыс тілі",s:"5-сынып оқушылары сөз табын болжап, кездейсоқ анықтайды, өйткені тек атаулар тізімін есте сақтаған. Оларға «Сұраққа жауап бере ме? Зат, белгі немесе іс-әрекетті атай ма?» деген қадамдық ойлау жолын қалай көрсетуге болады?",
+x:"Орыс тілінде сөз таптары дербес және көмекші болып бөлінеді. Дербес сөз таптары заттарды, белгілерді, санды және іс-әрекетті атайды, сұраққа жауап береді және сөйлем мүшесі болады: зат есім, сын есім, сан есім, есімдік, етістік, үстеу. Көмекші сөз таптары – предлог, жалғаулық, шылау – зат пен белгіні атамайды, сұраққа жауап бермейді және сөйлем мүшесі болмайды: олар сөздерді байланыстырады немесе мағына реңкін қосады. Одағай бөлек тұрады: ол сезімді білдіреді, бірақ атамайды. «Причастие» мен «деепричастиені» етістіктің ерекше формалары деп санайды.",
+g:"5-сынып (10–11 жас)",f:"иерархия: сөз таптары → дербес және көмекші → нақты сөз таптары, сұрағы мен мысалымен",d:"Ішкі деңгей үштен аспасын, әр сөз табына бір қысқа мысал, сирек жіктемесіз."},
+en:{n:"Russian language",s:"Fifth graders guess the part of speech of a word because they only remember a list of names. How can they be given a step-by-step line of reasoning: ‘Does it answer a question? Does it name an object, a feature or an action?’",
+x:"In Russian, parts of speech are divided into independent and auxiliary ones. Independent parts of speech name objects, features, quantity and actions, answer questions and can be parts of a sentence: noun, adjective, numeral, pronoun, verb, adverb. Auxiliary parts of speech – preposition, conjunction, particle – do not name objects or features, do not answer questions and are not parts of a sentence: they connect words or add shades of meaning. The interjection stands apart: it expresses feelings but does not name them. The participle and the verbal adverb are considered special forms of the verb.",
+g:"Grade 5 (ages 10–11)",f:"the hierarchy: parts of speech → independent and auxiliary → each specific part with its question and an example",d:"At most three levels, one short example per part of speech, no rare classifications."}},
+
+{id:"kaz",tv:"table",sv:"flow",
+ru:{n:"Казахский язык",s:"Ученики 5 класса знают, что в казахском языке 7 падежей, но в письменных работах ошибаются в окончаниях: не учитывают последний звук основы и твёрдость или мягкость слова. Какая визуализация поможет выбрать окончание по шагам?",
+x:"В казахском языке семь падежей (септік): атау (кім? не?), ілік (кімнің? ненің?), барыс (кімге? неге?), табыс (кімді? нені?), жатыс (кімде? неде?), шығыс (кімнен? неден?), көмектес (кіммен? немен?). Окончания зависят от гармонии гласных и последнего звука основы. Например, барыс: кітапқа (после глухого – -қа), мектепке (после глухого, мягкое слово – -ке), үйге (после й, мягкое слово – -ге), қалаға (после гласного, твёрдое слово – -ға). Именительный падеж окончания не имеет.",
+g:"5 класс (10–11 лет)",f:"7 падежей с вопросами, а для дательного (барыс) – окончания по четырём вариантам последнего звука с примерами",d:"Одна таблица, не больше 7 строк и 4 столбцов; только примеры из текста, незаполненные ячейки оставь пустыми."},
+kk:{n:"Қазақ тілі",s:"5-сынып оқушылары қазақ тілінде 7 септік бар екенін біледі, бірақ жазба жұмыстарында жалғауларда қателеседі: түбірдің соңғы дыбысын, сөздің жуан-жіңішкелігін ескермейді. Жалғауды қадамдап таңдауға қандай визуализация көмектеседі?",
+x:"Қазақ тілінде жеті септік бар: атау (кім? не?), ілік (кімнің? ненің?), барыс (кімге? неге?), табыс (кімді? нені?), жатыс (кімде? неде?), шығыс (кімнен? неден?), көмектес (кіммен? немен?). Жалғаулар буын үндестігіне және түбірдің соңғы дыбысына байланысты. Мысалы, барыс септігі: кітапқа (қатаң дыбыстан кейін – -қа), мектепке (қатаң дыбыстан кейін, жіңішке сөз – -ке), үйге (й-дан кейін, жіңішке сөз – -ге), қалаға (дауыстыдан кейін, жуан сөз – -ға). Атау септікте жалғау жоқ.",
+g:"5-сынып (10–11 жас)",f:"7 септік сұрақтарымен, ал барыс септігі үшін – соңғы дыбыстың төрт нұсқасына қарай жалғаулар мысалдарымен",d:"Бір кесте, 7 жолдан және 4 бағаннан аспасын; тек мәтіндегі мысалдар, толтырылмаған ұяшықтарды бос қалдыр."},
+en:{n:"Kazakh language",s:"Fifth graders know that Kazakh has 7 cases, yet they make mistakes in endings in writing: they ignore the last sound of the stem and whether the word is hard or soft. Which visualization would help them choose an ending step by step?",
+x:"Kazakh has seven cases (септік): nominative (кім? не?), genitive (кімнің? ненің?), dative (кімге? неге?), accusative (кімді? нені?), locative (кімде? неде?), ablative (кімнен? неден?), instrumental (кіммен? немен?). The endings depend on vowel harmony and on the last sound of the stem. For example, the dative: кітапқа (after a voiceless consonant – -қа), мектепке (after a voiceless consonant, soft word – -ке), үйге (after й, soft word – -ге), қалаға (after a vowel, hard word – -ға). The nominative has no ending.",
+g:"Grade 5 (ages 10–11)",f:"the 7 cases with their questions and, for the dative, the endings for four variants of the last sound with examples",d:"One table, at most 7 rows and 4 columns; only examples from the text, leave empty cells blank."}},
+
+{id:"math",tv:"flow",sv:"chart",
+ru:{n:"Математика",s:"Восьмиклассники решают квадратные уравнения, но не помнят, когда у уравнения два корня, один или ни одного. Формулы выучены, а связи между знаком дискриминанта и числом корней они не видят. Что поможет «увидеть» эти три случая?",
+x:"Квадратное уравнение имеет вид ax² + bx + c = 0, где a ≠ 0. Для его решения вычисляют дискриминант D = b² − 4ac. Если D > 0, уравнение имеет два корня: x₁,₂ = (−b ± √D) / (2a). Если D = 0, корень один: x = −b / (2a). Если D < 0, действительных корней нет. Пример: x² − 5x + 6 = 0; D = 25 − 24 = 1; x₁ = 3, x₂ = 2.",
+g:"8 класс (13–14 лет)",f:"алгоритм решения: вычисление D, три ветви по знаку D, формулы корней и числовой пример",d:"Одна блок-схема, не более 10 блоков, ромбы только для проверки условий; без вывода формул."},
+kk:{n:"Математика",s:"8-сынып оқушылары квадрат теңдеулерді шешеді, бірақ теңдеудің қашан екі түбірі, бір түбірі болатынын немесе мүлде түбірі болмайтынын есте ұстамайды. Формулаларды жаттаған, ал дискриминант таңбасы мен түбір саны арасындағы байланысты көрмейді. Осы үш жағдайды «көруге» не көмектеседі?",
+x:"Квадрат теңдеудің түрі: ax² + bx + c = 0, мұндағы a ≠ 0. Оны шешу үшін дискриминантты есептейді: D = b² − 4ac. Егер D > 0 болса, теңдеудің екі түбірі бар: x₁,₂ = (−b ± √D) / (2a). Егер D = 0 болса, түбір біреу: x = −b / (2a). Егер D < 0 болса, нақты түбір жоқ. Мысал: x² − 5x + 6 = 0; D = 25 − 24 = 1; x₁ = 3, x₂ = 2.",
+g:"8-сынып (13–14 жас)",f:"шешу алгоритмі: D есептеу, D таңбасына қарай үш тармақ, түбір формулалары және сандық мысал",d:"Бір блок-схема, 10 блоктан аспасын, ромб тек шартты тексеру үшін; формулаларды қорытусыз."},
+en:{n:"Mathematics",s:"Eighth graders solve quadratic equations but cannot remember when an equation has two roots, one root or none. They have learned the formulas but do not see the link between the sign of the discriminant and the number of roots. What would help them ‘see’ these three cases?",
+x:"A quadratic equation has the form ax² + bx + c = 0, where a ≠ 0. To solve it, calculate the discriminant D = b² − 4ac. If D > 0, the equation has two roots: x₁,₂ = (−b ± √D) / (2a). If D = 0, there is one root: x = −b / (2a). If D < 0, there are no real roots. Example: x² − 5x + 6 = 0; D = 25 − 24 = 1; x₁ = 3, x₂ = 2.",
+g:"Grade 8 (ages 13–14)",f:"the solution algorithm: calculating D, three branches by the sign of D, the root formulas and the numeric example",d:"One flowchart, at most 10 blocks, diamonds only for condition checks; no derivation of formulas."}},
+
+{id:"geo",tv:"cycle",sv:"infographic",
+ru:{n:"География",s:"Шестиклассники выучили слова «испарение», «конденсация», «осадки», но говорят, что вода «пропадает» после дождя и не могут объяснить, как она возвращается в океан и чем большой круговорот отличается от малого. Нужен наглядный плакат, который ученики смогут «прочитать» сами.",
+x:"Круговорот воды в природе – непрерывное движение воды между океаном, атмосферой и сушей. Под действием солнечного тепла вода испаряется с поверхности океанов, морей, рек и почвы. Водяной пар поднимается вверх, охлаждается и конденсируется в облака. Из облаков вода выпадает в виде дождя, снега или града. Часть осадков стекает в реки и возвращается в океан, часть просачивается в почву и становится подземными водами. Различают большой круговорот (океан – суша – океан) и малый (только над океаном или только над сушей).",
+g:"6 класс (11–12 лет)",f:"замкнутый цикл из этапов (испарение, конденсация, осадки, сток и просачивание) с пометкой большого и малого круговорота",d:"5–7 блоков, без химических и физических формул; стрелки показывают направление движения воды."},
+kk:{n:"География",s:"6-сынып оқушылары «булану», «конденсация», «жауын-шашын» сөздерін жаттады, бірақ жаңбырдан кейін су «жоғалады» дейді, оның мұхитқа қалай оралатынын және үлкен айналымның кіші айналымнан қандай айырмасы бар екенін түсіндіре алмайды. Оқушылар өздері «оқи» алатын көрнекі плакат қажет.",
+x:"Судың табиғаттағы айналымы – мұхит, атмосфера және құрлық арасындағы судың үздіксіз қозғалысы. Күн жылуының әсерінен су мұхиттар, теңіздер, өзендер мен топырақ бетінен буланады. Су буы жоғары көтеріліп, суынады да, бұлтқа айналады (конденсация). Бұлттардан су жаңбыр, қар немесе бұршақ түрінде жауады. Жауын-шашынның бір бөлігі өзендерге ағып, мұхитқа оралады, екінші бөлігі топыраққа сіңіп, жер асты суына айналады. Үлкен айналым (мұхит – құрлық – мұхит) және кіші айналым (тек мұхит үстінде немесе тек құрлық үстінде) болады.",
+g:"6-сынып (11–12 жас)",f:"кезеңдерден тұратын тұйық цикл (булану, конденсация, жауын-шашын, ағын және сіңу), үлкен және кіші айналымның белгісімен",d:"5–7 блок, химиялық және физикалық формулаларсыз; көрсеткілер судың қозғалыс бағытын көрсетсін."},
+en:{n:"Geography",s:"Sixth graders have learned the words ‘evaporation’, ‘condensation’ and ‘precipitation’, but say the water ‘disappears’ after rain and cannot explain how it returns to the ocean or how the large cycle differs from the small one. A poster that students can ‘read’ on their own is needed.",
+x:"The water cycle is the continuous movement of water between the ocean, the atmosphere and the land. Heated by the Sun, water evaporates from the surface of oceans, seas, rivers and soil. Water vapor rises, cools and condenses into clouds. From the clouds, water falls as rain, snow or hail. Part of the precipitation runs into rivers and returns to the ocean; part seeps into the soil and becomes groundwater. There is a large cycle (ocean – land – ocean) and a small cycle (only over the ocean or only over the land).",
+g:"Grade 6 (ages 11–12)",f:"a closed cycle of stages (evaporation, condensation, precipitation, runoff and seepage), with the large and small cycles marked",d:"5–7 blocks, no chemical or physical formulas; arrows show the direction of water movement."}},
+
+{id:"bio",tv:"model3d",sv:"labeled",
+ru:{n:"Биология",s:"Шестиклассники смотрят на плоский рисунок клетки в учебнике и представляют её плоским кружком: они не понимают, как органоиды расположены друг относительно друга и чем они занимаются. Какая визуализация даст и название, и функцию каждой части?",
+x:"Растительная клетка окружена клеточной стенкой из целлюлозы, которая придаёт ей форму и прочность. Под стенкой находится клеточная мембрана, регулирующая обмен веществ. Внутри клетки расположено ядро с ДНК – центр управления. В цитоплазме находятся митохондрии, где вырабатывается энергия, и хлоропласты с хлорофиллом, в которых идёт фотосинтез. Большую часть объёма занимает центральная вакуоль с клеточным соком; она поддерживает тургор. Рибосомы синтезируют белки.",
+g:"6–7 класс (12–13 лет)",f:"объёмное строение клетки: расположение органоидов относительно стенки, мембраны и ядра и функцию каждого органоида в одной подписи",d:"Не более 8 органоидов, простая геометрия, без молекулярных подробностей."},
+kk:{n:"Биология",s:"6-сынып оқушылары оқулықтағы жасушаның жалпақ суретін қарап, оны жалпақ шеңбер деп елестетеді: органоидтардың бір-біріне қатысты қалай орналасқанын және не істейтінін түсінбейді. Қандай визуализация әр бөліктің атауы мен қызметін бірге береді?",
+x:"Өсімдік жасушасын целлюлозадан тұратын жасуша қабырғасы қоршайды, ол жасушаға пішін мен беріктік береді. Қабырғаның астында зат алмасуды реттейтін жасуша мембранасы орналасқан. Жасуша ішінде ДНК бар ядро – басқару орталығы – орналасқан. Цитоплазмада энергия өндірілетін митохондриялар және фотосинтез жүретін хлорофиллі хлоропластар бар. Көлемнің көп бөлігін жасуша сөлі бар орталық вакуоль алады; ол тургорды сақтайды. Рибосомалар белок синтездейді.",
+g:"6–7-сынып (12–13 жас)",f:"жасушаның көлемді құрылысы: органоидтардың қабырға, мембрана және ядроға қатысты орналасуы, әр органоидтың қызметі бір жазуда",d:"8 органоидтан аспасын, қарапайым геометрия, молекулалық егжей-тегжейсіз."},
+en:{n:"Biology",s:"Sixth graders look at a flat textbook picture of a cell and imagine it as a flat circle: they do not understand how the organelles are placed relative to each other or what they do. Which visualization would give both the name and the function of each part?",
+x:"A plant cell is surrounded by a cell wall made of cellulose, which gives it shape and strength. Under the wall lies the cell membrane, which controls the exchange of substances. Inside the cell is the nucleus with DNA – the control center. The cytoplasm contains mitochondria, where energy is produced, and chloroplasts with chlorophyll, where photosynthesis takes place. Most of the volume is taken by the central vacuole with cell sap; it maintains turgor pressure. Ribosomes build proteins.",
+g:"Grades 6–7 (ages 12–13)",f:"the 3D structure of the cell: where each organelle sits relative to the wall, the membrane and the nucleus, and the function of each in one label",d:"At most 8 organelles, simple geometry, no molecular detail."}},
+
+{id:"chem",tv:"table",sv:"flow",
+ru:{n:"Химия",s:"Восьмиклассники знают четыре типа реакций, но, увидев новое уравнение, не могут определить его тип. Определения звучат как набор слов. Какой визуальный алгоритм поможет решать «по вопросам»: сколько веществ вступило в реакцию и сколько получилось?",
+x:"Химические реакции делят на четыре основных типа. Реакция соединения: из нескольких веществ образуется одно, например 2H₂ + O₂ → 2H₂O. Реакция разложения: из одного вещества получаются несколько, например 2H₂O → 2H₂ + O₂. Реакция замещения: простое вещество замещает атомы в сложном, например Zn + 2HCl → ZnCl₂ + H₂. Реакция обмена: два сложных вещества обмениваются составными частями, например NaOH + HCl → NaCl + H₂O.",
+g:"8 класс (13–14 лет)",f:"четыре типа реакций по общим параметрам: схема, число исходных веществ и продуктов, пример из текста",d:"Одна таблица 4×4, без расчётов и подробностей об окислительно-восстановительных реакциях."},
+kk:{n:"Химия",s:"8-сынып оқушылары реакцияның төрт түрін біледі, бірақ жаңа теңдеуді көргенде оның түрін анықтай алмайды. Анықтамалар сөздер жиынтығы сияқты естіледі. Қандай көрнекі алгоритм «сұрақтар арқылы» шешуге көмектеседі: қанша зат әрекеттесті және қанша зат түзілді?",
+x:"Химиялық реакциялар төрт негізгі түрге бөлінеді. Қосылу реакциясы: бірнеше заттан бір зат түзіледі, мысалы 2H₂ + O₂ → 2H₂O. Ыдырау реакциясы: бір заттан бірнеше зат пайда болады, мысалы 2H₂O → 2H₂ + O₂. Орынбасу реакциясы: жай зат күрделі заттағы атомдарды ығыстырады, мысалы Zn + 2HCl → ZnCl₂ + H₂. Алмасу реакциясы: екі күрделі зат өз құрамды бөліктерімен алмасады, мысалы NaOH + HCl → NaCl + H₂O.",
+g:"8-сынып (13–14 жас)",f:"реакцияның төрт түрі ортақ параметрлер бойынша: сызба, бастапқы заттар мен өнімдер саны, мәтіндегі мысал",d:"Бір 4×4 кесте, есептеусіз және тотығу-тотықсыздану егжей-тегжейінсіз."},
+en:{n:"Chemistry",s:"Eighth graders know the four types of reactions, but when they see a new equation they cannot identify its type. The definitions sound like a set of words. Which visual algorithm would help them decide ‘by questions’: how many substances reacted and how many were formed?",
+x:"Chemical reactions are divided into four main types. In a combination reaction, several substances form one, for example 2H₂ + O₂ → 2H₂O. In a decomposition reaction, one substance gives several, for example 2H₂O → 2H₂ + O₂. In a single replacement reaction, a simple substance replaces atoms in a compound, for example Zn + 2HCl → ZnCl₂ + H₂. In a double replacement reaction, two compounds exchange their components, for example NaOH + HCl → NaCl + H₂O.",
+g:"Grade 8 (ages 13–14)",f:"the four reaction types by common parameters: scheme, number of reactants and products, example from the text",d:"One 4×4 table, no calculations and no redox detail."}},
+
+{id:"phys",tv:"chart",sv:"flow",
+ru:{n:"Физика",s:"Семиклассники уверены, что на «американских горках» энергия «пропадает», когда тележка тормозит, и ссылаются на то, что вторая горка ниже первой. Формулы они выучили. Как показать, куда уходит энергия?",
+x:"Тележка американских горок поднята на вершину холма. Наверху у неё максимальная потенциальная энергия и почти нулевая кинетическая. При спуске потенциальная энергия уменьшается, а кинетическая растёт; внизу скорость наибольшая. При подъёме на следующий холм превращение идёт в обратную сторону. Если пренебречь трением, полная механическая энергия не меняется – это закон сохранения энергии. В реальности часть энергии переходит во внутреннюю (тепло) из-за трения и сопротивления воздуха, поэтому каждый следующий холм ниже предыдущего.",
+g:"7 класс (12–13 лет)",f:"потенциальную и кинетическую энергию в трёх точках пути (вершина, середина спуска, низ) и отдельно потери на тепло",d:"Без числовых расчётов и формул: только относительные размеры столбцов; 3 точки, 2–3 категории энергии."},
+kk:{n:"Физика",s:"7-сынып оқушылары «американдық төбелерде» арба тежелгенде энергия «жоғалады» деп сенеді, өйткені екінші төбе біріншіден аласа. Формулаларды олар жаттап алған. Энергияның қайда кететінін қалай көрсетуге болады?",
+x:"Американдық төбелердегі арба төбенің басына көтерілген. Жоғарыда оның потенциалдық энергиясы ең үлкен, ал кинетикалық энергиясы нөлге жақын. Төмен түскенде потенциалдық энергия азаяды, кинетикалық энергия артады; төменде жылдамдық ең үлкен. Келесі төбеге көтерілгенде түрлену кері бағытта жүреді. Үйкелісті ескермесек, толық механикалық энергия өзгермейді – бұл энергияның сақталу заңы. Шын мәнінде энергияның бір бөлігі үйкеліс пен ауаның кедергісінен ішкі энергияға (жылуға) айналады, сондықтан әрбір келесі төбе алдыңғыдан аласа болады.",
+g:"7-сынып (12–13 жас)",f:"жолдың үш нүктесіндегі (төбенің басы, түсудің ортасы, төменгі нүкте) потенциалдық және кинетикалық энергия, жеке жылуға кететін шығын",d:"Сандық есептеусіз және формулаларсыз: бағандардың салыстырмалы өлшемі ғана; 3 нүкте, энергияның 2–3 санаты."},
+en:{n:"Physics",s:"Seventh graders are sure that on a roller coaster energy ‘disappears’ when the car slows down, and they point out that the second hill is lower than the first. They have learned the formulas. How can we show where the energy goes?",
+x:"A roller-coaster car is lifted to the top of a hill. At the top it has maximum potential energy and almost zero kinetic energy. On the way down, potential energy decreases and kinetic energy grows; at the bottom the speed is highest. Climbing the next hill reverses the conversion. If friction is ignored, the total mechanical energy does not change – this is the law of conservation of energy. In reality part of the energy turns into internal energy (heat) because of friction and air resistance, so each next hill is lower than the previous one.",
+g:"Grade 7 (ages 12–13)",f:"potential and kinetic energy at three points of the track (top, middle of the descent, bottom) and, separately, the losses to heat",d:"No numeric calculations or formulas: only relative bar sizes; 3 points, 2–3 energy categories."}},
+
+{id:"art",tv:"cycle",sv:"table",
+ru:{n:"Изобразительное искусство",s:"На уроке в 5 классе учитель показывает палитру красок, но ученики смешивают цвета наугад и получают «грязные» оттенки. Они не различают тёплые и холодные цвета и не знают, какие цвета контрастируют. Какая таблица поможет выбрать цвета осознанно?",
+x:"Цветовой круг помогает понять, как смешивать краски. Три основных цвета – красный, жёлтый и синий; их нельзя получить смешиванием других красок. При смешении двух основных получаются составные цвета: красный и жёлтый дают оранжевый, жёлтый и синий – зелёный, синий и красный – фиолетовый. Цвета, расположенные напротив друг друга на круге, называют контрастными (дополнительными): например, синий и оранжевый. Цвета делят на тёплые (красный, оранжевый, жёлтый) и холодные (синий, голубой, фиолетовый). Тёплые цвета кажутся ближе, холодные – дальше.",
+g:"5 класс (10–11 лет)",f:"цветовой круг из 3 основных и 3 составных цветов, пары контрастных цветов и деление на тёплые и холодные",d:"Только 6 цветов круга; без оттенков, тонов и насыщенности."},
+kk:{n:"Бейнелеу өнері",s:"5-сыныптағы сабақта мұғалім бояулар палитрасын көрсетеді, ал оқушылар түстерді кездейсоқ араластырып, «лас» реңктер алады. Олар жылы және суық түстерді ажыратпайды және қандай түстер контраст болатынын білмейді. Қандай кесте түстерді саналы таңдауға көмектеседі?",
+x:"Түстер шеңбері бояуларды қалай араластыруды түсінуге көмектеседі. Үш негізгі түс – қызыл, сары және көк; оларды басқа бояуларды араластырып алуға болмайды. Екі негізгі түсті араластырғанда құранды түстер шығады: қызыл мен сары қызғылт сарыны, сары мен көк жасылды, көк пен қызыл күлгінді береді. Шеңберде бір-біріне қарама-қарсы орналасқан түстерді контрасты (толықтауыш) түстер деп атайды: мысалы, көк және қызғылт сары. Түстер жылы (қызыл, қызғылт сары, сары) және суық (көк, ашық көк, күлгін) болып бөлінеді. Жылы түстер жақынырақ, суық түстер алысырақ көрінеді.",
+g:"5-сынып (10–11 жас)",f:"3 негізгі және 3 құранды түсі бар түстер шеңбері, контрасты түстер жұптары және жылы мен суық түстерге бөлу",d:"Шеңберде тек 6 түс; реңктер, тондар және қанықтықсыз."},
+en:{n:"Fine art",s:"In a fifth-grade lesson the teacher shows a palette, but students mix colors at random and get ‘muddy’ shades. They cannot tell warm colors from cool ones and do not know which colors contrast. Which table would help them choose colors deliberately?",
+x:"The color wheel helps to understand how to mix paints. The three primary colors are red, yellow and blue; they cannot be made by mixing other paints. Mixing two primary colors gives secondary colors: red and yellow make orange, yellow and blue make green, blue and red make purple. Colors opposite each other on the wheel are called contrasting (complementary), for example blue and orange. Colors are also divided into warm (red, orange, yellow) and cool (blue, light blue, purple). Warm colors seem closer, cool colors seem farther away.",
+g:"Grade 5 (ages 10–11)",f:"a color wheel with 3 primary and 3 secondary colors, the pairs of contrasting colors and the warm/cool division",d:"Only 6 colors on the wheel; no shades, tones or saturation."}},
+
+{id:"pe",tv:"infographic",sv:"slides",
+ru:{n:"Физическая культура",s:"На уроке волейбола в 8 классе учитель показывает верхнюю подачу и объясняет её словами. Большинство учеников повторяют движение с одной и той же ошибкой: подбрасывают мяч слишком близко и бьют по нему не в верхней точке. Как показать технику так, чтобы ошибку можно было заметить заранее?",
+x:"Верхняя прямая подача в волейболе выполняется в пять шагов. 1. Исходное положение: встаньте лицом к сетке, ноги на ширине плеч (для правши левая нога чуть впереди), мяч в левой руке перед собой. 2. Подбрасывание: подбросьте мяч вверх на небольшую высоту перед правым плечом. 3. Замах: правую руку отведите назад, локоть выше плеча. 4. Удар: ударьте ладонью по мячу в верхней точке подброса, рука прямая. 5. Завершение: перенесите вес тела вперёд и сделайте шаг в площадку. Частые ошибки: низкий или неточный подброс, удар согнутой рукой, отсутствие шага.",
+g:"8 класс (13–14 лет)",f:"пять шагов подачи по порядку и типичные ошибки на каждом шаге",d:"Одна страница, короткие подписи (до 7 слов), без биомеханических терминов."},
+kk:{n:"Дене шынықтыру",s:"8-сыныптағы волейбол сабағында мұғалім жоғарыдан берілетін подачаны көрсетіп, сөзбен түсіндіреді. Көп оқушы қозғалысты бір қатемен қайталайды: добты тым жақын лақтырады және оны ең жоғарғы нүктеде ұрмайды. Қатені алдын ала байқауға болатындай техниканы қалай көрсетуге болады?",
+x:"Волейболдағы жоғарғы түзу подача бес қадаммен орындалады. 1. Бастапқы қалып: торға қарап тұрыңыз, аяқтар иық еніндей (оңқайлар үшін сол аяқ сәл алда), доп сол қолда алдыңызда. 2. Лақтыру: добты оң иықтың алдына аз биіктікке жоғары лақтырыңыз. 3. Сермеу: оң қолды артқа әкетіңіз, шынтақ иықтан жоғары. 4. Соққы: добты лақтырудың ең жоғарғы нүктесінде алақанмен ұрыңыз, қол түзу. 5. Аяқтау: дене салмағын алға ауыстырып, алаңға қадам жасаңыз. Жиі қателер: тым төмен немесе дәл емес лақтыру, бүгілген қолмен ұру, қадам жасамау.",
+g:"8-сынып (13–14 жас)",f:"подачаның бес қадамы ретімен және әр қадамдағы типтік қателер",d:"Бір бет, қысқа жазулар (7 сөзге дейін), биомеханикалық терминдерсіз."},
+en:{n:"Physical education",s:"In an eighth-grade volleyball lesson the teacher demonstrates the overhand serve and explains it in words. Most students repeat the movement with the same mistake: they toss the ball too close and do not hit it at its highest point. How can the technique be shown so that the mistake can be spotted in advance?",
+x:"The overhand serve in volleyball is performed in five steps. 1. Starting position: face the net, feet shoulder-width apart (for a right-hander the left foot slightly forward), ball in the left hand in front of you. 2. Toss: toss the ball up a short distance in front of the right shoulder. 3. Backswing: take the right arm back, elbow above the shoulder. 4. Contact: hit the ball with the palm at the highest point of the toss, arm straight. 5. Follow-through: shift your weight forward and step into the court. Common mistakes: a low or inaccurate toss, hitting with a bent arm, no step.",
+g:"Grade 8 (ages 13–14)",f:"the five serve steps in order and the typical mistakes at each step",d:"One page, short labels (up to 7 words), no biomechanics terms."}},
+
+{id:"mus",tv:"infographic",sv:"chart",
+ru:{n:"Музыка",s:"В 5 классе ученики разучивают ритм по нотам. Они знают названия длительностей, но в такте 4/4 то добавляют лишние доли, то недобирают. Объяснение «целая – четыре, половинная – две» не помогает. Как «увидеть» длительность и сумму в такте?",
+x:"Длительность ноты показывает, сколько времени звучит звук. Целая нота длится 4 доли, половинная – 2 доли, четвертная – 1 долю, восьмая – половину доли, шестнадцатая – четверть доли. Каждая следующая длительность вдвое короче предыдущей. Размер 4/4 означает, что в каждом такте четыре четвертные доли. Сумма длительностей нот в такте всегда равна размеру: например, одна половинная и две четвертные дают 2 + 1 + 1 = 4 доли.",
+g:"5 класс (10–11 лет)",f:"длительности нот как полоски пропорциональной длины и примеры тактов 4/4, которые «заполняются» до четырёх долей",d:"5 длительностей, 3 примера тактов; без пауз, точек и залигованных нот."},
+kk:{n:"Музыка",s:"5-сыныпта оқушылар ырғақты ноталар бойынша үйренеді. Олар ұзақтық атауларын біледі, бірақ 4/4 өлшемінде бір кезде артық бөлік қосады, бір кезде жетіспейді. «Бүтін – төрт, жарты – екі» деген түсіндірме көмектеспейді. Ұзақтықты және өлшемдегі қосындыны қалай «көруге» болады?",
+x:"Ноталардың ұзақтығы дыбыстың қанша уақыт созылатынын көрсетеді. Бүтін нота 4 бөлікке, жарты нота 2 бөлікке, ширек нота 1 бөлікке, сегізден бір нота бөліктің жартысына, он алтыдан бір нота бөліктің төрттен біріне созылады. Әрбір келесі ұзақтық алдыңғысынан екі есе қысқа. 4/4 өлшемі әр такте төрт ширек бөлік бар дегенді білдіреді. Тактідегі ноталар ұзақтығының қосындысы әрқашан өлшемге тең: мысалы, бір жарты және екі ширек нота 2 + 1 + 1 = 4 бөлік береді.",
+g:"5-сынып (10–11 жас)",f:"нота ұзақтықтары пропорционал ұзындықты жолақтар түрінде және төрт бөлікке дейін «толтырылатын» 4/4 такт мысалдары",d:"5 ұзақтық, 3 такт мысалы; паузасыз, нүктесіз және лигасыз."},
+en:{n:"Music",s:"In grade 5 students learn rhythm from notation. They know the names of note values, but in 4/4 time they add extra beats or come up short. The explanation ‘a whole note is four, a half note is two’ does not help. How can they ‘see’ note values and the total in a bar?",
+x:"Note value shows how long a sound lasts. A whole note lasts 4 beats, a half note 2 beats, a quarter note 1 beat, an eighth note half a beat, a sixteenth note a quarter of a beat. Each next value is half as long as the previous one. The time signature 4/4 means that each bar has four quarter-note beats. The sum of the note values in a bar always equals the time signature: for example, one half note and two quarter notes make 2 + 1 + 1 = 4 beats.",
+g:"Grade 5 (ages 10–11)",f:"note values as strips of proportional length and examples of 4/4 bars that ‘fill up’ to four beats",d:"5 note values, 3 sample bars; no rests, dots or ties."}},
+
+{id:"dom",tv:"labeled",sv:"venn",
+ru:{n:"Игра на домбре",s:"На занятии кружка начинающие домбристы путают два основных стиля исполнения: шертпе и тёкпе. Они слышат разницу, но не могут объяснить, чем отличаются приёмы игры правой рукой и характер звучания. Какая визуализация покажет общее и различия?",
+x:"Домбра – казахский двухструнный щипковый инструмент. Основные части домбры: корпус (шанақ) с декой (бет), гриф (мойын) с ладами (перне), головка с колками (құлақ) и две струны (ішек). Звук извлекают правой рукой. Различают два основных стиля исполнения. Шертпе күй исполняют щипком пальцев: звучание мелодичное, пальцы работают по отдельным струнам. Төкпе күй исполняют ударами всей кисти по обеим струнам: звучание быстрое, мощное и динамичное.",
+g:"5–6 класс (11–12 лет), кружок домбры",f:"подписанный рисунок домбры с названиями частей на казахском и русском и краткую подпись с двумя стилями игры",d:"Один рисунок с 7–8 подписями, без акустических терминов и точных размеров."},
+kk:{n:"Домбыра ойнау",s:"Үйірме сабағында жаңадан бастаған домбырашылар орындаудың екі негізгі стилін – шертпе мен төкпені шатастырады. Олар айырмашылықты естиді, бірақ оң қолдың ойнау тәсілдері мен дыбыс сипатының қандай айырмасы бар екенін түсіндіре алмайды. Ортақ белгілер мен айырмашылықтарды қандай визуализация көрсетеді?",
+x:"Домбыра – қазақтың екі ішекті шертпелі аспабы. Домбыраның негізгі бөліктері: беті бар шанақ, пернелері бар мойын, құлақтары бар бас және екі ішек. Дыбысты оң қолмен шығарады. Орындаудың екі негізгі стилі бар. Шертпе күйді саусақпен шертіп орындайды: дыбыс әуенді, саусақтар жеке ішектермен жұмыс істейді. Төкпе күйді бүкіл қолдың екі ішекті қағуымен орындайды: дыбыс жылдам, күшті және серпінді.",
+g:"5–6-сынып (11–12 жас), домбыра үйірмесі",f:"домбыраның бөліктері белгіленген сурет және ойнаудың екі стилінің қысқаша жазуы",d:"Бір сурет, 7–8 жазу, акустикалық терминдерсіз және нақты өлшемдерсіз."},
+en:{n:"Dombra playing",s:"In a dombra club, beginners mix up the two main performance styles: shertpe and tokpe. They hear the difference but cannot explain how the right-hand techniques and the character of the sound differ. Which visualization would show what the styles have in common and how they differ?",
+x:"The dombra is a Kazakh two-string plucked instrument. Its main parts are the body (shanak) with the soundboard (bet), the neck (moyin) with frets (perne), the head with tuning pegs (kulak) and two strings (ishek). The sound is produced with the right hand. There are two main performance styles. Shertpe kuy is performed by plucking with the fingers: the sound is melodic, and the fingers work on separate strings. Tokpe kuy is performed by strumming both strings with the whole hand: the sound is fast, powerful and dynamic.",
+g:"Grades 5–6 (ages 11–12), dombra club",f:"a labeled picture of the dombra and a short caption with the two playing styles",d:"One picture with 7–8 labels, no acoustics terms and no exact dimensions."}}
+];
+
+/* ======================= TASKS for tab 4A ======================= */
+var TASKS=[
+{best:"chart",
+ru:{t:"Показать результаты опроса класса о том, как ученики добираются до школы (пешком 45 %, автобус 30 %, машина 15 %, велосипед 10 %).",g:"7 класс (12–13 лет)",w:"Нужно сравнить доли целого, а чисел мало, поэтому столбчатая или круговая диаграмма читается быстрее таблицы."},
+kk:{t:"Оқушылардың мектепке қалай баратыны туралы сынып сауалнамасының нәтижелерін көрсету (жаяу 45 %, автобус 30 %, көлік 15 %, велосипед 10 %).",g:"7-сынып (12–13 жас)",w:"Бүтіннің үлестерін салыстыру керек, ал сандар аз, сондықтан бағанды немесе дөңгелек диаграмма кестеге қарағанда тезірек оқылады."},
+en:{t:"Show the results of a class survey on how students get to school (on foot 45%, bus 30%, car 15%, bicycle 10%).",g:"Grade 7 (ages 12–13)",w:"The goal is to compare shares of a whole and there are few numbers, so a bar or pie chart is read faster than a table."}},
+{best:"flow",
+ru:{t:"Научить алгоритму сложения дробей с разными знаменателями.",g:"6 класс (11–12 лет)",w:"Задача – последовательность шагов с одним решением («знаменатели равны?»), что лучше всего показывает блок-схема."},
+kk:{t:"Бөлімдері әртүрлі бөлшектерді қосу алгоритмін үйрету.",g:"6-сынып (11–12 жас)",w:"Міндет – бір шешімі бар («бөлімдері тең бе?») қадамдар тізбегі, оны блок-схема жақсы көрсетеді."},
+en:{t:"Teach the algorithm for adding fractions with different denominators.",g:"Grade 6 (ages 11–12)",w:"The task is a sequence of steps with one decision (are the denominators equal?), which a flowchart shows best."}},
+{best:"timeline",
+ru:{t:"Помочь запомнить порядок шести ключевых событий изучаемого исторического периода.",g:"8 класс (13–14 лет)",w:"Главное здесь – порядок и промежутки между событиями во времени, и временная линия показывает это напрямую."},
+kk:{t:"Оқылатын тарихи кезеңнің алты негізгі оқиғасының ретін есте сақтауға көмектесу.",g:"8-сынып (13–14 жас)",w:"Мұндағы басты нәрсе – оқиғалардың уақыт бойынша реті мен аралықтары, оны уақыт сызығы тікелей көрсетеді."},
+en:{t:"Help students remember the order of six key events of a historical period.",g:"Grade 8 (ages 13–14)",w:"The main idea is the order and the intervals of events in time, which a timeline shows directly."}},
+{best:"venn",
+ru:{t:"Сравнить двух литературных героев по чертам характера, поступкам и отношению к окружающим.",g:"9 класс (14–15 лет)",w:"Цель – найти, что у героев общего и чем они различаются, и диаграмма Венна показывает оба аспекта сразу."},
+kk:{t:"Екі әдеби кейіпкерді мінезі, әрекеттері және айналасындағыларға қатынасы бойынша салыстыру.",g:"9-сынып (14–15 жас)",w:"Мақсат – кейіпкерлердің ортақ және айырмашылық белгілерін табу, Венн диаграммасы екеуін бірден көрсетеді."},
+en:{t:"Compare two literary heroes by traits, actions and attitude to others.",g:"Grade 9 (ages 14–15)",w:"The goal is to find what the heroes share and how they differ, and a Venn diagram shows both at once."}},
+{best:"labeled",
+ru:{t:"Объяснить строение речной системы: исток, притоки, главная река, устье и бассейн.",g:"6 класс (11–12 лет)",w:"Нужно назвать части одного объекта на своих местах, поэтому подписанный рисунок – самый прямой способ."},
+kk:{t:"Өзен жүйесінің құрылымын түсіндіру: бастау, салалар, басты өзен, сағасы және алабы.",g:"6-сынып (11–12 жас)",w:"Бір нысанның бөліктерін өз орнында атау керек, сондықтан белгіленген сурет – ең тура тәсіл."},
+en:{t:"Explain the structure of a river system: source, tributaries, main river, mouth and basin.",g:"Grade 6 (ages 11–12)",w:"The goal is to name parts of one object in their places, so a labeled diagram is the most direct."}},
+{best:"infographic",
+ru:{t:"Подготовить учеников к лабораторной работе по химии: правила безопасности и шаги опыта.",g:"8 класс (13–14 лет)",w:"Плакат с пронумерованными шагами можно повесить у лабораторного стола и быстро читать во время работы."},
+kk:{t:"Оқушыларды химиядан зертханалық жұмысқа дайындау: қауіпсіздік ережелері және тәжірибе қадамдары.",g:"8-сынып (13–14 жас)",w:"Нөмірленген қадамдары бар плакатты зертханалық үстелдің жанына ілуге және жұмыс кезінде тез оқуға болады."},
+en:{t:"Prepare students for a chemistry lab: safety rules and experiment steps.",g:"Grade 8 (ages 13–14)",w:"A poster with numbered steps can hang at the lab bench and be read quickly while working."}},
+{best:"model3d",
+ru:{t:"Показать пространственную форму молекулы метана (CH₄).",g:"9 класс (14–15 лет)",w:"Форма трёхмерная, поэтому вращающаяся 3D-модель передаёт её лучше любого плоского рисунка."},
+kk:{t:"Метан молекуласының (CH₄) кеңістіктік пішінін көрсету.",g:"9-сынып (14–15 жас)",w:"Пішін үш өлшемді, сондықтан айналатын 3D-модель оны кез келген жалпақ суреттен жақсы жеткізеді."},
+en:{t:"Show the spatial shape of a methane molecule (CH₄).",g:"Grade 9 (ages 14–15)",w:"The shape is three-dimensional, so a rotating 3D model conveys it better than any flat picture."}}
+];
+var GRADES={ru:["1–4 класс (7–10 лет)","5–7 класс (11–13 лет)","8–9 класс (14–15 лет)","10–11 класс (16–17 лет)"],
+ kk:["1–4-сынып (7–10 жас)","5–7-сынып (11–13 жас)","8–9-сынып (14–15 жас)","10–11-сынып (16–17 жас)"],
+ en:["Grades 1–4 (ages 7–10)","Grades 5–7 (ages 11–13)","Grades 8–9 (ages 14–15)","Grades 10–11 (ages 16–17)"]};
+
+/* ======================= UI TEXT ======================= */
+var T={};
+T.ru={code:"ru",ans:"русском языке",doneLbl:"Выполнено",
+title:"Иллюстратор знаний",sub:"Визуализируем процессы и данные с помощью ИИ",skip:"К содержимому",
+tabs:["Основы","Ситуации","Использование","Что лучше?","Закрепление и обратная связь"],
+langLbl:"Язык",toLight:"Включить светлую тему",toDark:"Включить тёмную тему",tabsLbl:"Вкладки",
+instrT:"Как работать с этой вкладкой",prev:"Назад",next:"Далее",copied:"Скопировано",
+copyText:"Копировать текст",copyPrompt:"Копировать промпт",copyBoth:"Копировать текст + промпт",copy:"Копировать",
+cats:{all:"Все предметы",lang:"Языки",nat:"Естественно-научные",art:"Искусство и спорт"},
+words:"Слов",wordsMax:"максимум 200",
+instr:{
+ basics:["Прочитайте теорию и сверьте её с шагами алгоритма.","Отмечайте выполненные шаги флажками – полоска показывает прогресс.","Скопируйте «формулу промпта» и используйте её как заготовку в следующих вкладках."],
+ situations:["Откройте ситуацию, прочитайте проблему и подумайте, какая визуализация помогла бы.","Нажмите «Показать подсказку», чтобы сравнить свой вариант с рекомендуемым.","Кнопка «Готовый промпт» перенесёт вас во вкладку «Что лучше?» к промпту для этой ситуации."],
+ usage:["Откройте карточку предмета: в ней учебный текст (до 200 слов) и готовый промпт.","Нажмите «Копировать текст + промпт» и вставьте в любой бесплатный ИИ из списка ниже.","Сверьте результат с исходным текстом и уточните его дополнительными запросами."],
+ better:["Часть A: опишите свою учебную задачу или выберите пример, скопируйте промпт и вставьте в ИИ – он подскажет подходящий вид визуализации с обоснованием.","Сравните ответ ИИ с «ключом» под примером.","Часть B: возьмите готовый промпт для ситуации из вкладки «Ситуации» и запустите его в ИИ."],
+ review:["Прочитайте главные выводы сессии и отметьте понятые пункты.","Проверьте себя в мини-игре «Подберите вид визуализации».","Оставьте обратную связь: пройдите опрос по ссылке или заполните встроенную форму."]},
+ai:{t:"Бесплатные ИИ без регистрации",intro:"Откройте любой сервис, вставьте скопированный промпт и отправьте. Если один сервис недоступен или исчерпан лимит, попробуйте другой.",
+ tools:[["Duck.ai","https://duck.ai","чат DuckDuckGo: работает без аккаунта, несколько моделей на выбор"],["ChatGPT","https://chatgpt.com","базовая версия открывается без входа, действуют дневные лимиты"],["Microsoft Copilot","https://copilot.microsoft.com","чат Microsoft; базовые функции доступны без входа"],["Mistral Le Chat","https://chat.mistral.ai","базовые функции доступны без аккаунта"],["Perplexity","https://www.perplexity.ai","поисковый ИИ с источниками; простые запросы без входа"]],
+ rT:"Где «нарисовать» результат",r:[["Mermaid Live Editor","https://mermaid.live","вставьте код Mermaid из ответа ИИ и получите схему, которую можно сохранить как PNG или SVG"],["diagrams.net","https://app.diagrams.net","редактор схем без регистрации – для ручной доработки"],["Excalidraw","https://excalidraw.com","доска для рисования схем от руки"]],
+ html:"Если ИИ вернул HTML-код, сохраните его в файл с расширением .html и откройте в браузере.",
+ nb:["NotebookLM","https://notebooklm.google.com","основной инструмент курса: загрузите текст в раздел Sources (нужен аккаунт Google)"],
+ warn:"Доступность, лимиты и региональные ограничения сервисов могут меняться. Не вводите в ИИ персональные данные учеников."},
+b1:{theoryT:"Теория",theory:["Современная школа работает с большими объёмами информации, что делает актуальным использование ИИ-инструментов для её анализа и структурирования. Генеративные интеллектуальные системы, в том числе NotebookLM, позволяют преобразовывать учебные тексты в наглядные визуальные формы: схемы, таблицы, временные линии и карты понятий.","Визуализация снижает когнитивную нагрузку, помогает сосредоточиться на анализе и интерпретации информации и развивает цифровую, исследовательскую и ИИ-грамотность. Инструмент универсален и применим на уроках разных предметов.","Работа ИИ основана на анализе исходного материала: он выделяет ключевые понятия и логические связи и строит визуальные модели на основе контекста. Визуализации сопровождаются пояснениями и сохраняют причинно-следственные связи, поэтому их удобно использовать для объяснения материала и для самостоятельного анализа учащимися.","Главное правило: промпт определяет форму и глубину визуализации, а проверка результата по исходному тексту остаётся за человеком."],
+ algT:"Алгоритм визуализации с помощью ИИ",algIntro:"Восемь шагов от учебной цели до готового материала. Отмечайте выполненные.",
+ steps:[["Определите цель и аудиторию","Что ученик должен понять (последовательность, сравнение, структуру, динамику) и сколько ему лет."],["Подготовьте источник","Короткий текст или данные (3–5 абзацев, 4–8 предложений для первого опыта). Проверьте факты до загрузки."],["Выберите вид визуализации","Блок-схема, таблица, временная линия, карта понятий, диаграмма, инфографика, подписанный рисунок, 3D-модель, презентация."],["Составьте промпт","Роль, аудитория, источник, задача, что показать, глубина и ограничения, формат результата. Удобно использовать «структурируй + визуализируй»."],["Запустите в ИИ","Загрузите документ в NotebookLM или вставьте текст и промпт в чат бесплатного ИИ."],["Проверьте результат","Сверьте с источником: все ли этапы включены, верна ли логика, нет ли выдуманных фактов."],["Уточните","Последовательными запросами добавьте подэтапы, описания, группы, причинно-следственные связи или смените формат."],["Включите в урок и соберите отклик","Используйте как раздаточный материал, опору для объяснения или задание; спросите учеников, что стало понятнее."]],
+ progress:"Выполнено шагов",
+ stagesT:"Этапы работы системы при визуализации данных",stages:[["Загрузка документа","Пользователь загружает текст или PDF; система формирует внутреннюю модель знаний."],["Анализ содержания","ИИ выделяет ключевые понятия, этапы процессов, логические связи, сравниваемые элементы и структуру текста. Это основа будущей визуализации."],["Преобразование в визуальные модели","Создаются схемы процессов, сравнительные таблицы, структурные карты, временные линии и краткие конспекты."],["Работа через промпты","Запрос задаёт форму и глубину визуализации. Например: «Создай визуальную схему основных идей документа», «Представь процесс в виде блок-схемы», «Сформируй сравнительную таблицу», «Построй временную линию событий»."],["Уточнение результата","Учитель корректирует схему, добавляет детали или меняет формат последовательными запросами."],["Проверка корректности","Сверка с исходным текстом, оценка полноты и логики – это развивает ИИ-грамотность."]],
+ typesT:"Какой вид визуализации выбрать",typesIntro:"Выбор определяется учебной целью:",
+ formulaT:"Формула промпта",formulaIntro:"Скопируйте заготовку и заполните пункты в квадратных скобках.",
+ formula:"Роль: [кто ты, например учитель предмета и эксперт по визуализации].\nАудитория: [класс, возраст].\nИсточник: [вставьте текст или данные] – используй только его.\nЗадача: создай [вид визуализации].\nЧто показать: [ключевые элементы и связи].\nГлубина и ограничения: [сколько элементов, чего не включать].\nФормат результата: [Mermaid / таблица Markdown / HTML].\nПроверка: добавь два вопроса для проверки понимания и список упрощений.\nЯзык ответа: [язык].",
+ follow:"Уточняющие запросы",followList:["Сделай схему более подробной, выделив подэтапы.","Добавь краткое описание под каждым блоком.","Сгруппируй этапы в логические блоки.","Выдели причинно-следственные связи между этапами.","Сократи до самых значимых элементов."]},
+b2:{intro:"Ситуации из школьной практики: в каждой слова не справились, и стало ясно, что нужна визуализация.",show:"Показать подсказку",hide:"Скрыть подсказку",rec:"Подходящая визуализация",why:"Подходит, чтобы",toPrompt:"Готовый промпт",think:"Подумайте, какая визуализация помогла бы:"},
+b3:{intro:"Для каждого предмета подготовлен учебный текст (не более 200 слов) и промпт для визуализации с учётом возраста и предмета.",howT:"Как использовать текст",how:["Выберите предмет и откройте карточку.","Нажмите «Копировать текст + промпт».","Откройте любой бесплатный ИИ из списка ниже и вставьте текст в окно чата.","Если ИИ вернул код Mermaid, вставьте его в mermaid.live; если HTML – сохраните как .html и откройте в браузере.","Сверьте результат с исходным текстом и уточните запросами."],textT:"Учебный текст",promptT:"Промпт",recViz:"Вид визуализации",textLabel:"ТЕКСТ"},
+b4:{aT:"Часть A. Какая визуализация лучше подходит для задачи",aIntro:"Опишите учебную задачу и возраст учеников. Промпт попросит ИИ определить, что именно нужно понять ученикам, предложить три подходящих вида визуализации и обосновать выбор.",taskLbl:"Учебная задача",taskPh:"Например: объяснить 6 классу алгоритм сложения дробей",gradeLbl:"Возраст учеников",ex:"Примеры реальных задач",resultT:"Готовый промпт",keyT:"Показать «ключ» для сравнения",bestIs:"Наиболее подходящий вид",
+ meta:"Ты – опытный учитель и эксперт по визуализации учебных данных.\nУчебная задача: {task}\nУченики: {grade}.\nШаг 1. Определи, что задача требует от учеников понять: последовательность, сравнение, доли, изменение во времени, структуру, причину и следствие или пространственную форму.\nШаг 2. Выбери из списка три наиболее подходящих вида визуализации: {list}.\nШаг 3. Для каждого вида обоснуй выбор (почему он подходит к цели и возрасту, сколько элементов вмещает) и назови один риск.\nШаг 4. Выбери один лучший вариант и объясни выбор в двух предложениях.\nШаг 5. Предложи готовый промпт, который я смогу вставить в ИИ для создания этой визуализации.\nОтветь таблицей для шагов 2–3 и коротким выводом. Отвечай на {ans}.",
+ bT:"Часть B. Промпты для визуализации ситуаций",bIntro:"Для каждой ситуации из вкладки «Ситуации» подобран наиболее подходящий вид визуализации. Промпт содержит ситуацию, исходный материал и ограничения.",sitLbl:"Ситуация",srcLbl:"Исходный материал",
+ sit:"Роль: ты – опытный учитель предмета «{subj}» и специалист по визуализации данных.\nАудитория: {grade}.\nУчебная ситуация: {sit}\nИсходный материал (используй только его): {txt}\nЗадача: создай наиболее подходящую визуализацию – {viz} – которая решает эту ситуацию. В двух предложениях объясни, почему этот вид подходит (он нужен, чтобы {b}) и почему обычного текстового объяснения недостаточно.\nГлубина и ограничения: {depth}\nФормат результата: {fmt}.\nВ конце добавь одну идею, как использовать результат на уроке за 5 минут.\nОтвечай на {ans}."},
+ tplText:"Роль: ты – опытный учитель предмета «{subj}» и эксперт по визуализации учебных данных.\nАудитория: {grade}.\nЗадача: используя ТОЛЬКО приведённый ниже текст, создай {viz} (чтобы {hint}).\nЧто должно быть показано: {focus}.\nГлубина и ограничения: {depth} Формулируй просто, по возрасту. Не добавляй факты, которых нет в тексте.\nФормат результата: {fmt}.\nПосле результата добавь: (1) подпись для учеников в одно предложение, (2) два вопроса для проверки понимания, (3) список того, что ты упростил.\nОтвечай на {ans}.",
+b5:{keyT:"Главное из сессии",keyIntro:"Отметьте пункты, которые вам понятны.",keys:[["Визуализация – способ мышления","Она показывает структуру, связи и динамику и снижает когнитивную нагрузку."],["Промпт задаёт форму и глубину","Включайте роль, возраст, источник, вид визуализации, формат и ограничения."],["«Структурируй + визуализируй»","Сначала попросите выделить ключевые понятия и связи, затем построить схему."],["Начинайте с коротких текстов","3–5 абзацев или 4–8 предложений достаточно для первого результата."],["Всегда проверяйте по источнику","Полнота, логика, отсутствие выдуманных фактов – это ИИ-грамотность."],["Уточняйте последовательными запросами","Подэтапы, описания, группы, причинно-следственные связи, другой формат."],["Вид выбирается по учебной цели","Последовательность – блок-схема, сравнение – таблица или диаграмма Венна, время – линия, доли – диаграмма, части – подписанный рисунок, форма – 3D."],["Берегите данные","Не вводите в бесплатные ИИ персональные данные учеников."],["Встройте в урок и спросите учеников","Раздаточный материал, опора для объяснения, групповое задание, затем обратная связь."]],
+ gameT:"Мини-игра: подберите вид визуализации",gameIntro:"Для каждой цели выберите подходящий вид и нажмите «Проверить».",pick:"Выберите…",check:"Проверить",again:"Сбросить",score:"Верно: {s} из {t}",
+ fbT:"Обратная связь",fbIntro:"Ваше мнение поможет улучшить занятие.",surveyT:"Опрос по ссылке",open:"Открыть опрос в новой вкладке",embed:"Показать форму здесь",hideEmbed:"Скрыть форму",copyLink:"Копировать ссылку",embedNote:"Если форма не отображается, откройте её в новой вкладке.",
+ noSurvey:"Ссылка на опрос пока не задана. Организатору: вставьте ссылку на форму в начале кода страницы, в строке window.SURVEY_URL=\"\" (между кавычками) – после этого здесь появятся кнопки открытия опроса.",
+ builtT:"Встроенная быстрая анкета",rate:"Общая оценка занятия (1 – низкая, 5 – высокая)",likert:["Материал был понятным","Задания полезны для моих уроков","Я буду применять визуализацию с ИИ в работе"],open1:"Что было самым полезным?",open2:"Что стоит улучшить?",ph:"Ваш ответ…",copyAns:"Копировать мои ответы",clear:"Очистить анкету",saved:"Сохранено на этом устройстве",
+ formT:"Как создать свою форму Google",formSteps:["Откройте forms.google.com и создайте пустую форму.","Добавьте вопросы (список можно скопировать кнопкой ниже).","Нажмите «Отправить» → значок ссылки → «Копировать».","Вставьте ссылку в window.SURVEY_URL в начале кода страницы."],copyQs:"Копировать список вопросов для формы",
+ qList:"1. Общая оценка занятия (шкала 1–5)\n2. Материал был понятным (шкала 1–5)\n3. Задания полезны для моих уроков (шкала 1–5)\n4. Я буду применять визуализацию с ИИ в работе (шкала 1–5)\n5. Что было самым полезным? (развёрнутый ответ)\n6. Что стоит улучшить? (развёрнутый ответ)",
+ ansHead:"Мои ответы"}};
+
+T.kk={code:"kk",ans:"қазақ тілінде",doneLbl:"Орындалды",
+title:"Білім иллюстраторы",sub:"ЖИ көмегімен үдерістер мен деректерді визуализациялаймыз",skip:"Мазмұнға өту",
+tabs:["Негіздер","Жағдаяттар","Қолдану","Не жақсы?","Бекіту және кері байланыс"],
+langLbl:"Тіл",toLight:"Жарық тақырыпқа ауысу",toDark:"Қараңғы тақырыпқа ауысу",tabsLbl:"Беттер",
+instrT:"Бұл бетпен қалай жұмыс істеу керек",prev:"Артқа",next:"Алға",copied:"Көшірілді",
+copyText:"Мәтінді көшіру",copyPrompt:"Промптты көшіру",copyBoth:"Мәтін + промптты көшіру",copy:"Көшіру",
+cats:{all:"Барлық пән",lang:"Тілдер",nat:"Жаратылыстану",art:"Өнер және спорт"},
+words:"Сөз саны",wordsMax:"ең көбі 200",
+instr:{
+ basics:["Теорияны оқып, алгоритм қадамдарымен салыстырыңыз.","Орындалған қадамдарды құсбелгімен белгілеңіз – жолақ үлгерімді көрсетеді.","«Промпт формуласын» көшіріп, келесі беттерде дайын үлгі ретінде пайдаланыңыз."],
+ situations:["Жағдаятты ашып, мәселені оқыңыз және қандай визуализация көмектесетінін ойланыңыз.","Өз нұсқаңызды ұсынылған нұсқамен салыстыру үшін «Кеңесті көрсету» түймесін басыңыз.","«Дайын промпт» түймесі сізді «Не жақсы?» бетіне, осы жағдаятқа арналған промптқа апарады."],
+ usage:["Пән карточкасын ашыңыз: онда оқу мәтіні (200 сөзден аспайтын) және дайын промпт бар.","«Мәтін + промптты көшіру» түймесін басып, төмендегі тізімнен кез келген тегін ЖИ-ге қойыңыз.","Нәтижені бастапқы мәтінмен салыстырып, қосымша сұраныстармен нақтылаңыз."],
+ better:["A бөлімі: оқу міндетін сипаттаңыз немесе мысал таңдап, промптты көшіріп, ЖИ-ге қойыңыз – ол негіздемесімен қолайлы визуализация түрін ұсынады.","ЖИ жауабын мысалдың астындағы «кілтпен» салыстырыңыз.","B бөлімі: «Жағдаяттар» бетіндегі жағдаятқа арналған дайын промптты алып, ЖИ-де іске қосыңыз."],
+ review:["Сессияның басты тұжырымдарын оқып, түсінгендеріңізді белгілеңіз.","«Визуализация түрін таңдаңыз» шағын ойынында өзіңізді тексеріңіз.","Кері байланыс қалдырыңыз: сілтеме бойынша сауалнамадан өтіңіз немесе кірістірілген форманы толтырыңыз."]},
+ai:{t:"Тіркеусіз қолжетімді тегін ЖИ",intro:"Кез келген қызметті ашып, көшірілген промптты қойып, жіберіңіз. Бір қызмет қолжетімсіз болса немесе лимит біткен болса, басқасын көріңіз.",
+ tools:[["Duck.ai","https://duck.ai","DuckDuckGo чаты: аккаунтсыз жұмыс істейді, бірнеше модель таңдауға болады"],["ChatGPT","https://chatgpt.com","базалық нұсқасы кірусіз ашылады, күндік лимит бар"],["Microsoft Copilot","https://copilot.microsoft.com","Microsoft чаты; базалық функциялар кірусіз қолжетімді"],["Mistral Le Chat","https://chat.mistral.ai","базалық функциялар аккаунтсыз қолжетімді"],["Perplexity","https://www.perplexity.ai","дереккөздері бар іздеу ЖИ-і; қарапайым сұраныстар кірусіз"]],
+ rT:"Нәтижені қайда «салуға» болады",r:[["Mermaid Live Editor","https://mermaid.live","ЖИ жауабындағы Mermaid кодын қойып, PNG немесе SVG ретінде сақтауға болатын схема алыңыз"],["diagrams.net","https://app.diagrams.net","тіркеусіз схема редакторы – қолмен жетілдіру үшін"],["Excalidraw","https://excalidraw.com","схемаларды қолмен салуға арналған тақта"]],
+ html:"ЖИ HTML-код қайтарса, оны .html кеңейтімді файлға сақтап, браузерде ашыңыз.",
+ nb:["NotebookLM","https://notebooklm.google.com","курстың негізгі құралы: мәтінді Sources бөліміне жүктеңіз (Google аккаунты қажет)"],
+ warn:"Қызметтердің қолжетімділігі, лимиттері және аймақтық шектеулері өзгеруі мүмкін. ЖИ-ге оқушылардың жеке деректерін енгізбеңіз."},
+b1:{theoryT:"Теория",theory:["Қазіргі мектеп үлкен көлемдегі ақпаратпен жұмыс істейді, сондықтан оны талдау және құрылымдау үшін ЖИ құралдарын пайдалану өзекті. Генеративті интеллектуалды жүйелер, соның ішінде NotebookLM, оқу мәтіндерін көрнекі формаларға: схемаларға, кестелерге, уақыт сызықтарына және ұғымдар карталарына түрлендіруге мүмкіндік береді.","Визуализация когнитивтік жүктемені төмендетеді, ақпаратты талдау мен интерпретациялауға назар аударуға көмектеседі, цифрлық, зерттеушілік және ЖИ сауаттылығын дамытады. Құрал әмбебап және әртүрлі пәндер сабақтарында қолданылады.","ЖИ жұмысы бастапқы материалды талдауға негізделген: ол негізгі ұғымдар мен логикалық байланыстарды анықтап, контекстке сүйеніп визуалды модельдер құрады. Визуализациялар түсіндірмелермен толықтырылады және себеп-салдарлық байланыстарды сақтайды, сондықтан материалды түсіндіруде және оқушылардың өздігінен талдауында ыңғайлы.","Басты ереже: промпт визуализацияның түрі мен тереңдігін анықтайды, ал нәтижені бастапқы мәтінмен тексеру адамда қалады."],
+ algT:"ЖИ көмегімен визуализация алгоритмі",algIntro:"Оқу мақсатынан дайын материалға дейінгі сегіз қадам. Орындалғандарын белгілеңіз.",
+ steps:[["Мақсат пен аудиторияны анықтаңыз","Оқушы нені түсінуі керек (реттілік, салыстыру, құрылым, динамика) және оның жасы нешеде."],["Дереккөзді дайындаңыз","Қысқа мәтін немесе деректер (алғашқы тәжірибеге 3–5 абзац, 4–8 сөйлем). Жүктемес бұрын фактілерді тексеріңіз."],["Визуализация түрін таңдаңыз","Блок-схема, кесте, уақыт сызығы, ұғымдар картасы, диаграмма, инфографика, белгіленген сурет, 3D-модель, презентация."],["Промпт құрастырыңыз","Рөл, аудитория, дереккөз, міндет, нені көрсету, тереңдік пен шектеулер, нәтиже форматы. «Құрылымда + визуализацияла» үлгісі ыңғайлы."],["ЖИ-де іске қосыңыз","Құжатты NotebookLM-ге жүктеңіз немесе мәтін мен промптты тегін ЖИ чатына қойыңыз."],["Нәтижені тексеріңіз","Дереккөзбен салыстырыңыз: барлық кезеңдер енгізілген бе, логика дұрыс па, ойдан шығарылған факт жоқ па."],["Нақтылаңыз","Бірізді сұраныстармен аралық кезеңдерді, сипаттамаларды, топтарды, себеп-салдарлық байланыстарды қосыңыз немесе форматты өзгертіңіз."],["Сабаққа енгізіп, пікір жинаңыз","Үлестірме материал, түсіндіру тірегі немесе тапсырма ретінде қолданыңыз; оқушылардан нені жақсы түсінгенін сұраңыз."]],
+ progress:"Орындалған қадамдар",
+ stagesT:"Деректерді визуализациялау кезінде жүйенің жұмыс кезеңдері",stages:[["Құжатты жүктеу","Пайдаланушы мәтінді немесе PDF жүктейді; жүйе ішкі білім моделін қалыптастырады."],["Мазмұнды талдау","ЖИ негізгі ұғымдарды, үдеріс кезеңдерін, логикалық байланыстарды, салыстырылатын элементтерді және мәтін құрылымын анықтайды. Бұл болашақ визуализацияның негізі."],["Визуалды модельдерге түрлендіру","Үдеріс схемалары, салыстырмалы кестелер, құрылымдық карталар, уақыт сызықтары және қысқаша конспектілер жасалады."],["Промпттар арқылы жұмыс","Сұраныс визуализацияның түрі мен тереңдігін анықтайды. Мысалы: «Құжаттың негізгі идеяларының визуалды схемасын жаса», «Үдерісті блок-схема түрінде көрсет», «Салыстырмалы кесте құрастыр», «Оқиғалардың уақыт сызығын құр»."],["Нәтижені нақтылау","Мұғалім схеманы түзетеді, мәліметтер қосады немесе бірізді сұраныстармен форматты өзгертеді."],["Дұрыстығын тексеру","Бастапқы мәтінмен салыстыру, толықтық пен логиканы бағалау – бұл ЖИ сауаттылығын дамытады."]],
+ typesT:"Визуализацияның қандай түрін таңдау керек",typesIntro:"Таңдауды оқу мақсаты анықтайды:",
+ formulaT:"Промпт формуласы",formulaIntro:"Үлгіні көшіріп, шаршы жақшадағы тармақтарды толтырыңыз.",
+ formula:"Рөл: [сен кімсің, мысалы пән мұғалімі және визуализация сарапшысы].\nАудитория: [сынып, жас].\nДереккөз: [мәтін немесе деректерді қойыңыз] – тек соны пайдалан.\nМіндет: [визуализация түрін] жаса.\nНені көрсету: [негізгі элементтер мен байланыстар].\nТереңдік және шектеулер: [қанша элемент, нені қоспау].\nНәтиже форматы: [Mermaid / Markdown кестесі / HTML].\nТексеру: түсінуді тексеретін екі сұрақ және қарапайымдалғандардың тізімін қос.\nЖауап тілі: [тіл].",
+ follow:"Нақтылаушы сұраныстар",followList:["Аралық кезеңдерді бөліп көрсетіп, схеманы толығырақ жаса.","Әр блоктың астына қысқаша сипаттама қос.","Кезеңдерді логикалық топтарға біріктір.","Кезеңдер арасындағы себеп-салдарлық байланыстарды көрсет.","Тек ең маңызды элементтерге дейін қысқарт."]},
+b2:{intro:"Мектеп тәжірибесінен алынған жағдаяттар: әрқайсысында сөздер көмектеспей, визуализация қажет екені анықталды.",show:"Кеңесті көрсету",hide:"Кеңесті жасыру",rec:"Қолайлы визуализация",why:"Қолайлы, себебі ол мынаған көмектеседі:",toPrompt:"Дайын промпт",think:"Қандай визуализация көмектесетінін ойланыңыз:"},
+b3:{intro:"Әр пән үшін оқу мәтіні (200 сөзден аспайтын) және жас пен пәнді ескеретін визуализация промпты дайындалған.",howT:"Мәтінді қалай пайдалану керек",how:["Пәнді таңдап, карточканы ашыңыз.","«Мәтін + промптты көшіру» түймесін басыңыз.","Төмендегі тізімнен кез келген тегін ЖИ-ді ашып, мәтінді чат терезесіне қойыңыз.","ЖИ Mermaid кодын қайтарса, оны mermaid.live-қа қойыңыз; HTML болса – .html ретінде сақтап, браузерде ашыңыз.","Нәтижені бастапқы мәтінмен салыстырып, сұраныстармен нақтылаңыз."],textT:"Оқу мәтіні",promptT:"Промпт",recViz:"Визуализация түрі",textLabel:"МӘТІН"},
+b4:{aT:"A бөлімі. Міндетке қандай визуализация көбірек сәйкес келеді",aIntro:"Оқу міндетін және оқушылардың жасын сипаттаңыз. Промпт ЖИ-ден оқушыларға нені түсіну керек екенін анықтауды, үш қолайлы визуализация түрін ұсынуды және таңдауды негіздеуді сұрайды.",taskLbl:"Оқу міндеті",taskPh:"Мысалы: 6-сыныпқа бөлшектерді қосу алгоритмін түсіндіру",gradeLbl:"Оқушылардың жасы",ex:"Нақты міндеттер мысалдары",resultT:"Дайын промпт",keyT:"Салыстыру үшін «кілтті» көрсету",bestIs:"Ең қолайлы түрі",
+ meta:"Сен – тәжірибелі мұғалім және оқу деректерін визуализациялау сарапшысысың.\nОқу міндеті: {task}\nОқушылар: {grade}.\n1-қадам. Міндет оқушылардан нені түсінуді талап ететінін анықта: реттілікті, салыстыруды, үлестерді, уақыт бойынша өзгерісті, құрылымды, себеп пен салдарды немесе кеңістіктік пішінді.\n2-қадам. Тізімнен үш ең қолайлы визуализация түрін таңда: {list}.\n3-қадам. Әр түр үшін таңдауды негізде (оның мақсатқа және жасқа неге сәйкес келетіні, қанша элемент сыйғызатыны) және бір тәуекелді ата.\n4-қадам. Бір ең жақсы нұсқаны таңдап, таңдауды екі сөйлеммен түсіндір.\n5-қадам. Осы визуализацияны жасау үшін ЖИ-ге қоя алатын дайын промпт ұсын.\n2–3-қадамдарға кесте түрінде және қысқа қорытындымен жауап бер. {ans} жауап бер.",
+ bT:"B бөлімі. Жағдаяттарды визуализациялау промптары",bIntro:"«Жағдаяттар» бетіндегі әр жағдаят үшін ең қолайлы визуализация түрі таңдалған. Промптта жағдаят, бастапқы материал және шектеулер бар.",sitLbl:"Жағдаят",srcLbl:"Бастапқы материал",
+ sit:"Рөл: сен – «{subj}» пәнінің тәжірибелі мұғалімі және деректерді визуализациялау маманысың.\nАудитория: {grade}.\nОқу жағдаяты: {sit}\nБастапқы материал (тек соны пайдалан): {txt}\nМіндет: осы жағдаятты шешетін ең қолайлы визуализацияны – {viz} – жаса. Екі сөйлеммен бұл түр неге сәйкес келетінін (ол мынаған қажет: {b}) және қарапайым мәтіндік түсіндірменің неге жеткіліксіз екенін түсіндір.\nТереңдік және шектеулер: {depth}\nНәтиже форматы: {fmt}.\nСоңында нәтижені сабақта 5 минутта пайдалану туралы бір идея қос.\n{ans} жауап бер."},
+ tplText:"Рөл: сен – «{subj}» пәнінің тәжірибелі мұғалімі және оқу деректерін визуализациялау сарапшысысың.\nАудитория: {grade}.\nМіндет: тек төмендегі мәтінді пайдаланып, {viz} жаса (мақсаты: {hint}).\nНені көрсету керек: {focus}.\nТереңдігі мен шектеулері: {depth} Жасына сай қарапайым тілмен жаз. Мәтінде жоқ фактілерді қосба.\nНәтиже форматы: {fmt}.\nНәтижеден кейін қос: (1) оқушыларға арналған бір сөйлемдік тақырыпша, (2) түсінуді тексеретін екі сұрақ, (3) қарапайымдалған тұстардың тізімі.\n{ans} жауап бер.",
+b5:{keyT:"Сессияның басты тұжырымдары",keyIntro:"Өзіңізге түсінікті тармақтарды белгілеңіз.",keys:[["Визуализация – ойлау тәсілі","Ол құрылымды, байланыстарды және динамиканы көрсетеді, когнитивтік жүктемені азайтады."],["Промпт түрі мен тереңдігін анықтайды","Рөлді, жасты, дереккөзді, визуализация түрін, форматты және шектеулерді қосыңыз."],["«Құрылымда + визуализацияла»","Алдымен негізгі ұғымдар мен байланыстарды бөліп көрсетуді сұраңыз, содан кейін схема құрыңыз."],["Қысқа мәтіндерден бастаңыз","Алғашқы нәтижеге 3–5 абзац немесе 4–8 сөйлем жеткілікті."],["Әрқашан дереккөзбен тексеріңіз","Толықтық, логика, ойдан шығарылған фактінің болмауы – бұл ЖИ сауаттылығы."],["Бірізді сұраныстармен нақтылаңыз","Аралық кезеңдер, сипаттамалар, топтар, себеп-салдарлық байланыстар, басқа формат."],["Түр оқу мақсатына қарай таңдалады","Реттілік – блок-схема, салыстыру – кесте немесе Венн диаграммасы, уақыт – сызық, үлестер – диаграмма, бөліктер – белгіленген сурет, пішін – 3D."],["Деректерді қорғаңыз","Тегін ЖИ-ге оқушылардың жеке деректерін енгізбеңіз."],["Сабаққа енгізіп, оқушылардан сұраңыз","Үлестірме материал, түсіндіру тірегі, топтық тапсырма, содан кейін кері байланыс."]],
+ gameT:"Шағын ойын: визуализация түрін таңдаңыз",gameIntro:"Әр мақсат үшін қолайлы түрді таңдап, «Тексеру» түймесін басыңыз.",pick:"Таңдаңыз…",check:"Тексеру",again:"Қалпына келтіру",score:"Дұрыс: {s} / {t}",
+ fbT:"Кері байланыс",fbIntro:"Сіздің пікіріңіз сабақты жақсартуға көмектеседі.",surveyT:"Сілтеме бойынша сауалнама",open:"Сауалнаманы жаңа бетте ашу",embed:"Форманы осы жерде көрсету",hideEmbed:"Форманы жасыру",copyLink:"Сілтемені көшіру",embedNote:"Форма көрінбесе, оны жаңа бетте ашыңыз.",
+ noSurvey:"Сауалнамаға сілтеме әлі берілмеген. Ұйымдастырушыға: форма сілтемесін бет кодының басындағы window.SURVEY_URL=\"\" жолына (тырнақшалардың арасына) қойыңыз – содан кейін мұнда сауалнаманы ашу түймелері пайда болады.",
+ builtT:"Кірістірілген жылдам анкета",rate:"Сабақтың жалпы бағасы (1 – төмен, 5 – жоғары)",likert:["Материал түсінікті болды","Тапсырмалар менің сабақтарыма пайдалы","Жұмысымда ЖИ арқылы визуализацияны қолданамын"],open1:"Не ең пайдалы болды?",open2:"Не жақсартылуы керек?",ph:"Жауабыңыз…",copyAns:"Жауаптарымды көшіру",clear:"Анкетаны тазарту",saved:"Осы құрылғыда сақталды",
+ formT:"Өз Google формаңызды қалай жасауға болады",formSteps:["forms.google.com сайтын ашып, бос форма жасаңыз.","Сұрақтарды қосыңыз (тізімді төмендегі түймемен көшіруге болады).","«Жіберу» → сілтеме белгішесі → «Көшіру» түймесін басыңыз.","Сілтемені бет кодының басындағы window.SURVEY_URL жолына қойыңыз."],copyQs:"Форма үшін сұрақтар тізімін көшіру",
+ qList:"1. Сабақтың жалпы бағасы (1–5 шкаласы)\n2. Материал түсінікті болды (1–5 шкаласы)\n3. Тапсырмалар менің сабақтарыма пайдалы (1–5 шкаласы)\n4. Жұмысымда ЖИ арқылы визуализацияны қолданамын (1–5 шкаласы)\n5. Не ең пайдалы болды? (толық жауап)\n6. Не жақсартылуы керек? (толық жауап)",
+ ansHead:"Менің жауаптарым"}};
+
+T.en={code:"en",ans:"English",doneLbl:"Done",
+title:"Knowledge Illustrator",sub:"Visualizing processes and data with AI",skip:"Skip to content",
+tabs:["Basics","Situations","Usage","Which is better?","Review & feedback"],
+langLbl:"Language",toLight:"Switch to light theme",toDark:"Switch to dark theme",tabsLbl:"Tabs",
+instrT:"How to work with this tab",prev:"Back",next:"Next",copied:"Copied",
+copyText:"Copy text",copyPrompt:"Copy prompt",copyBoth:"Copy text + prompt",copy:"Copy",
+cats:{all:"All subjects",lang:"Languages",nat:"Natural sciences",art:"Arts and sport"},
+words:"Words",wordsMax:"maximum 200",
+instr:{
+ basics:["Read the theory and compare it with the steps of the algorithm.","Tick off completed steps – the bar shows your progress.","Copy the ‘prompt formula’ and use it as a template in the next tabs."],
+ situations:["Open a situation, read the problem and think about which visualization would help.","Press ‘Show hint’ to compare your idea with the recommended one.","The ‘Ready prompt’ button takes you to the ‘Which is better?’ tab, to the prompt for that situation."],
+ usage:["Open a subject card: it contains a learning text (up to 200 words) and a ready prompt.","Press ‘Copy text + prompt’ and paste it into any free AI from the list below.","Compare the result with the source text and refine it with follow-up requests."],
+ better:["Part A: describe your learning task or pick an example, copy the prompt and paste it into an AI – it will suggest a suitable type of visualization with reasons.","Compare the AI's answer with the ‘key’ under the example.","Part B: take the ready prompt for a situation from the ‘Situations’ tab and run it in an AI."],
+ review:["Read the key points of the session and tick the ones you understand.","Test yourself in the mini-game ‘Match the visualization type’.","Leave feedback: complete the survey by link or fill in the built-in form."]},
+ai:{t:"Free AI without registration",intro:"Open any service, paste the copied prompt and send it. If one service is unavailable or its limit is used up, try another.",
+ tools:[["Duck.ai","https://duck.ai","DuckDuckGo chat: works without an account, several models to choose from"],["ChatGPT","https://chatgpt.com","the basic version opens without signing in, daily limits apply"],["Microsoft Copilot","https://copilot.microsoft.com","Microsoft chat; basic features are available without signing in"],["Mistral Le Chat","https://chat.mistral.ai","basic features are available without an account"],["Perplexity","https://www.perplexity.ai","search AI with sources; simple queries without signing in"]],
+ rT:"Where to ‘draw’ the result",r:[["Mermaid Live Editor","https://mermaid.live","paste the Mermaid code from the AI's answer and get a diagram you can save as PNG or SVG"],["diagrams.net","https://app.diagrams.net","a diagram editor without registration – for manual refinement"],["Excalidraw","https://excalidraw.com","a whiteboard for hand-drawn diagrams"]],
+ html:"If the AI returns HTML code, save it to a file with the .html extension and open it in a browser.",
+ nb:["NotebookLM","https://notebooklm.google.com","the course's main tool: upload the text to the Sources section (a Google account is required)"],
+ warn:"Availability, limits and regional restrictions of these services may change. Do not enter students' personal data into an AI."},
+b1:{theoryT:"Theory",theory:["Today's school works with large volumes of information, which makes AI tools relevant for analyzing and structuring it. Generative intelligent systems, including NotebookLM, turn learning texts into clear visual forms: diagrams, tables, timelines and concept maps.","Visualization reduces cognitive load, helps people focus on analyzing and interpreting information, and develops digital, research and AI literacy. The approach is versatile and works in lessons across subjects.","The AI works by analyzing the source material: it identifies key concepts and logical connections and builds visual models from the context. The visualizations come with explanations and preserve cause-and-effect links, so they are convenient for explaining material and for students' independent analysis.","The main rule: the prompt determines the form and depth of the visualization, while checking the result against the source text remains the human's job."],
+ algT:"The algorithm of visualizing with AI",algIntro:"Eight steps from the learning goal to a finished material. Tick off the ones you have completed.",
+ steps:[["Define the goal and the audience","What the student must understand (a sequence, a comparison, a structure, dynamics) and how old the student is."],["Prepare the source","A short text or data (3–5 paragraphs, 4–8 sentences for a first try). Check the facts before uploading."],["Choose the visualization type","Flowchart, table, timeline, concept map, chart, infographic, labeled diagram, 3D model, presentation."],["Write the prompt","Role, audience, source, task, what to show, depth and limits, output format. The ‘structure + visualize’ pattern is convenient."],["Run it in an AI","Upload the document to NotebookLM or paste the text and prompt into a free AI chat."],["Check the result","Compare it with the source: are all stages included, is the logic right, are there invented facts."],["Refine","With follow-up requests add substages, descriptions, groups, cause-and-effect links, or change the format."],["Bring it into the lesson and collect feedback","Use it as a handout, a support for explanation or a task; ask students what became clearer."]],
+ progress:"Steps completed",
+ stagesT:"Stages of the system's work when visualizing data",stages:[["Uploading a document","The user uploads a text or PDF; the system builds an internal model of knowledge."],["Analyzing the content","The AI identifies key concepts, process stages, logical connections, elements to compare and the structure of the text. This is the basis of the future visualization."],["Turning it into visual models","Process diagrams, comparison tables, structure maps, timelines and short outlines are created."],["Working through prompts","The request sets the form and depth of the visualization. For example: ‘Create a visual diagram of the main ideas of the document’, ‘Present the process as a flowchart’, ‘Create a comparison table’, ‘Build a timeline of events’."],["Refining the result","The teacher adjusts the diagram, adds details or changes the format with follow-up requests."],["Checking for correctness","Comparing with the source text and assessing completeness and logic – this develops AI literacy."]],
+ typesT:"Which type of visualization to choose",typesIntro:"The choice is defined by the learning goal:",
+ formulaT:"The prompt formula",formulaIntro:"Copy the template and fill in the items in square brackets.",
+ formula:"Role: [who you are, e.g. a subject teacher and visualization expert].\nAudience: [grade, age].\nSource: [paste the text or data] – use only it.\nTask: create a [visualization type].\nWhat to show: [key elements and connections].\nDepth and limits: [how many elements, what to leave out].\nOutput format: [Mermaid / Markdown table / HTML].\nCheck: add two questions to check understanding and a list of simplifications.\nAnswer language: [language].",
+ follow:"Follow-up requests",followList:["Make the diagram more detailed by highlighting substages.","Add a short description under each block.","Group the stages into logical blocks.","Highlight cause-and-effect links between the stages.","Shorten it to the most significant elements."]},
+b2:{intro:"Situations from school practice: in each one, words alone fell short and a visualization was needed.",show:"Show hint",hide:"Hide hint",rec:"Suitable visualization",why:"It is suitable for",toPrompt:"Ready prompt",think:"Think about which visualization would help:"},
+b3:{intro:"For each subject there is a learning text (no more than 200 words) and a visualization prompt that takes age and subject into account.",howT:"How to use the text",how:["Choose a subject and open its card.","Press ‘Copy text + prompt’.","Open any free AI from the list below and paste the text into the chat window.","If the AI returns Mermaid code, paste it into mermaid.live; if HTML, save it as .html and open it in a browser.","Compare the result with the source text and refine it with follow-up requests."],textT:"Learning text",promptT:"Prompt",recViz:"Visualization type",textLabel:"TEXT"},
+b4:{aT:"Part A. Which visualization suits the task better",aIntro:"Describe the learning task and the students' age. The prompt asks the AI to decide what students must understand, suggest three suitable visualization types and justify the choice.",taskLbl:"Learning task",taskPh:"For example: explain to grade 6 the algorithm for adding fractions",gradeLbl:"Students' age",ex:"Examples of real tasks",resultT:"Ready prompt",keyT:"Show the ‘key’ for comparison",bestIs:"Most suitable type",
+ meta:"You are an experienced teacher and an expert in educational data visualization.\nLearning task: {task}\nStudents: {grade}.\nStep 1. Say what the task requires the students to understand: a sequence, a comparison, shares, change over time, structure, cause and effect, or spatial shape.\nStep 2. From this list choose the three most suitable visualization types: {list}.\nStep 3. For each type, justify the choice (why it fits the goal and the age, how many elements it can hold) and name one risk.\nStep 4. Choose the single best option and explain the choice in two sentences.\nStep 5. Offer a ready-to-use prompt that I can paste into an AI to build that visualization.\nAnswer with a table for steps 2–3 and a short conclusion. Respond in {ans}.",
+ bT:"Part B. Prompts for visualizing the situations",bIntro:"For every situation from the ‘Situations’ tab the most suitable visualization type is chosen. The prompt contains the situation, the source material and the limits.",sitLbl:"Situation",srcLbl:"Source material",
+ sit:"Role: you are an experienced {subj} teacher and a data-visualization specialist.\nAudience: {grade}.\nTeaching situation: {sit}\nSource material (use only it): {txt}\nTask: create the most suitable visualization – {viz} – that solves this situation. In two sentences explain why this type fits (it is needed for {b}) and why a plain text explanation is not enough.\nDepth and limits: {depth}\nOutput format: {fmt}.\nAt the end add one idea for using the result in a 5-minute lesson activity.\nRespond in {ans}."},
+ tplText:"Role: you are an experienced {subj} teacher and an expert in educational data visualization.\nAudience: {grade}.\nTask: using ONLY the text below, create a {viz} (its purpose: {hint}).\nWhat it must show: {focus}.\nDepth and limits: {depth} Use simple wording appropriate for the age. Do not add facts that are not in the text.\nOutput format: {fmt}.\nAfter the result add: (1) a one-sentence caption for students, (2) two questions that check understanding, (3) a list of what you simplified.\nRespond in {ans}.",
+b5:{keyT:"Key points of the session",keyIntro:"Tick the points that are clear to you.",keys:[["Visualization is a way of thinking","It shows structure, connections and dynamics and reduces cognitive load."],["The prompt sets form and depth","Include the role, age, source, visualization type, format and limits."],["‘Structure + visualize’","First ask to pick out key concepts and links, then to build the diagram."],["Start with short texts","3–5 paragraphs or 4–8 sentences are enough for a first result."],["Always check against the source","Completeness, logic and no invented facts – this is AI literacy."],["Refine with follow-up requests","Substages, descriptions, groups, cause-and-effect links, another format."],["The type follows the learning goal","Sequence – flowchart, comparison – table or Venn diagram, time – timeline, shares – chart, parts – labeled diagram, shape – 3D."],["Protect data","Do not enter students' personal data into free AI tools."],["Bring it into the lesson and ask students","Handout, support for explanation, group task, then feedback."]],
+ gameT:"Mini-game: match the visualization type",gameIntro:"Choose the suitable type for each goal and press ‘Check’.",pick:"Choose…",check:"Check",again:"Reset",score:"Correct: {s} of {t}",
+ fbT:"Feedback",fbIntro:"Your opinion will help improve the session.",surveyT:"Survey by link",open:"Open the survey in a new tab",embed:"Show the form here",hideEmbed:"Hide the form",copyLink:"Copy the link",embedNote:"If the form does not appear, open it in a new tab.",
+ noSurvey:"The survey link has not been set yet. For the organizer: paste the link to your form at the top of the page code, in the line window.SURVEY_URL=\"\" (between the quotes) – the buttons for opening the survey will then appear here.",
+ builtT:"Built-in quick questionnaire",rate:"Overall rating of the session (1 – low, 5 – high)",likert:["The material was clear","The tasks are useful for my lessons","I will use visualization with AI in my work"],open1:"What was the most useful?",open2:"What should be improved?",ph:"Your answer…",copyAns:"Copy my answers",clear:"Clear the questionnaire",saved:"Saved on this device",
+ formT:"How to create your own Google Form",formSteps:["Open forms.google.com and create a blank form.","Add the questions (you can copy the list with the button below).","Press ‘Send’ → the link icon → ‘Copy’.","Paste the link into window.SURVEY_URL at the top of the page code."],copyQs:"Copy the list of questions for the form",
+ qList:"1. Overall rating of the session (scale 1–5)\n2. The material was clear (scale 1–5)\n3. The tasks are useful for my lessons (scale 1–5)\n4. I will use visualization with AI in my work (scale 1–5)\n5. What was the most useful? (long answer)\n6. What should be improved? (long answer)",
+ ansHead:"My answers"}};
+
+/* ======================= STATE ======================= */
+var KEY="kia.";
+var store={
+  get:function(k,d){try{var v=localStorage.getItem(KEY+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set:function(k,v){try{localStorage.setItem(KEY+k,JSON.stringify(v))}catch(e){}}
+};
+function detect(){var n=((navigator.language||"ru")+"").toLowerCase();return n.indexOf("kk")===0?"kk":n.indexOf("en")===0?"en":"ru"}
+var S={lang:store.get("lang",null),theme:store.get("theme",null),tab:"basics",
+ alg:store.get("alg",{}),keys:store.get("keys",{}),fb:store.get("fb",{r:0,l:[0,0,0],a:"",b:""}),
+ cat3:"all",cat4:"all",open:{},hint:{},task:"",grade:1,showKey:false,match:{},matchChk:false,embed:false,scrollTo:null,focus:null};
+if(!T[S.lang])S.lang=detect();
+function L(){return T[S.lang]}
+function $(s){return document.querySelector(s)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
+function fmt(s,o){return s.replace(/\{(\w+)\}/g,function(m,k){return o[k]==null?m:o[k]})}
+function V(k){return VIZ[k][S.lang]}
+function SJ(s){return s[S.lang]}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+function words(t){return t.trim().split(/\s+/).length}
+function catOf(id){for(var c in CATS)if(CATS[c].indexOf(id)>=0)return c}
+
+/* prompt builders */
+function textPrompt(s){var l=L(),o=SJ(s),v=V(s.tv);return fmt(l.tplText,{subj:o.n,grade:o.g,viz:v.n,hint:v.b,focus:o.f,depth:o.d,fmt:v.f,ans:l.ans})}
+function sitPrompt(s){var l=L(),o=SJ(s),v=V(s.sv);return fmt(l.b4.sit,{subj:o.n,grade:o.g,sit:o.s,txt:o.x,viz:v.n,b:v.b,depth:o.d,fmt:v.f,ans:l.ans})}
+function metaPrompt(task,gr){var l=L();var list=VKEYS.map(function(k){return V(k).n}).join(", ");return fmt(l.b4.meta,{task:task||"[…]",grade:gr,list:list,ans:l.ans})}
+
+/* ======================= COMPONENTS ======================= */
+function instr(k){var l=L();return '<div class="instr" role="note"><b>'+esc(l.instrT)+'</b><ol>'+l.instr[k].map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ol></div>'}
+function copyBtn(label,text,cls){return '<button type="button" class="btn '+(cls||"")+'" data-act="copy" data-t="'+esc(text)+'">'+esc(label)+'</button>'}
+function aiBlock(){
+  var a=L().ai;
+  return '<section class="ai" aria-label="'+esc(a.t)+'"><h3>'+esc(a.t)+'</h3><p>'+esc(a.intro)+'</p><ul>'+a.tools.map(function(t){return '<li><a href="'+t[1]+'" target="_blank" rel="noopener noreferrer">'+esc(t[0])+'</a> – '+esc(t[2])+'</li>'}).join("")+'</ul>'+
+  '<h4>'+esc(a.rT)+'</h4><ul>'+a.r.map(function(t){return '<li><a href="'+t[1]+'" target="_blank" rel="noopener noreferrer">'+esc(t[0])+'</a> – '+esc(t[2])+'</li>'}).join("")+'</ul><p>'+esc(a.html)+'</p>'+
+  '<p><a href="'+a.nb[1]+'" target="_blank" rel="noopener noreferrer"><b>'+esc(a.nb[0])+'</b></a> – '+esc(a.nb[2])+'</p><p class="note">'+esc(a.warn)+'</p></section>';
+}
+function chips(cur,act){var c=L().cats;return '<div class="chips" role="group">'+["all","lang","nat","art"].map(function(k){return '<button type="button" class="chip" data-act="'+act+'" data-k="'+k+'" aria-pressed="'+(cur===k)+'">'+esc(c[k])+'</button>'}).join("")+'</div>'}
+function subjList(cat){return SUBJ.filter(function(s){return cat==="all"||catOf(s.id)===cat})}
+function det(id,summary,body){return '<details id="'+id+'"'+(S.open[id]?' open':'')+'><summary>'+summary+'</summary><div class="body">'+body+'</div></details>'}
+
+/* ======================= TABS ======================= */
+function vBasics(){
+  var b=L().b1,h='<h2>'+esc(L().tabs[0])+'</h2>'+instr("basics");
+  h+='<h3>'+esc(b.theoryT)+'</h3>'+b.theory.map(function(p){return '<p>'+esc(p)+'</p>'}).join("");
+  var done=0;b.steps.forEach(function(_,i){if(S.alg[i])done++});
+  h+='<h3>'+esc(b.algT)+'</h3><p>'+esc(b.algIntro)+'</p><p><label>'+esc(b.progress)+': <b>'+done+' / '+b.steps.length+'</b> <progress max="'+b.steps.length+'" value="'+done+'"></progress></label></p><ol class="steps">';
+  b.steps.forEach(function(st,i){h+='<li class="'+(S.alg[i]?'done':'')+'"><div class="num" aria-hidden="true">'+(i+1)+'</div><div><h4>'+esc(st[0])+'</h4><p>'+esc(st[1])+'</p><label class="chk"><input type="checkbox" data-act="alg" data-i="'+i+'"'+(S.alg[i]?' checked':'')+'><span>'+esc(L().doneLbl)+'</span></label></div></li>'});
+  h+='</ol><h3>'+esc(b.stagesT)+'</h3><ol class="steps">'+b.stages.map(function(st,i){return '<li><div class="num" aria-hidden="true">'+(i+1)+'</div><div><h4>'+esc(st[0])+'</h4><p>'+esc(st[1])+'</p></div></li>'}).join("")+'</ol>';
+  h+='<h3>'+esc(b.typesT)+'</h3><p>'+esc(b.typesIntro)+'</p><div class="tw"><table><thead><tr><th>'+esc(L().b3.recViz)+'</th><th>'+esc(b.typesIntro.replace(/:$/,""))+'</th></tr></thead><tbody>'+VKEYS.map(function(k){return '<tr><td><b>'+esc(cap(V(k).n))+'</b></td><td>'+esc(cap(V(k).b))+'</td></tr>'}).join("")+'</tbody></table></div>';
+  h+='<h3>'+esc(b.formulaT)+'</h3><p>'+esc(b.formulaIntro)+'</p><div class="pr">'+esc(b.formula)+'</div><div class="btns">'+copyBtn(L().copyPrompt,b.formula,"pri")+'</div>';
+  h+='<h3>'+esc(b.follow)+'</h3><div class="btns">'+b.followList.map(function(x){return '<button type="button" class="btn sm" data-act="copy" data-t="'+esc(x)+'">'+esc(x)+'</button>'}).join("")+'</div>';
+  return h;
+}
+
+function vSituations(){
+  var l=L(),b=l.b2,h='<h2>'+esc(l.tabs[1])+'</h2>'+instr("situations")+'<p>'+esc(b.intro)+'</p>';
+  ["lang","nat","art"].forEach(function(c){
+    h+='<h3 class="cat">'+esc(l.cats[c])+'</h3>';
+    CATS[c].forEach(function(id){
+      var s=SUBJ.filter(function(x){return x.id===id})[0],o=SJ(s),on=!!S.hint[id],v=V(s.sv);
+      var body='<p>'+esc(o.s)+'</p><p class="muted">'+esc(b.think)+'</p><div class="btns"><button type="button" class="btn" data-act="hint" data-id="'+id+'" aria-expanded="'+on+'">'+esc(on?b.hide:b.show)+'</button></div>';
+      if(on)body+='<div class="instr"><b>'+esc(b.rec)+': '+esc(v.n)+'</b>'+esc(b.why)+' '+esc(v.b)+'.</div><div class="btns"><button type="button" class="btn pri" data-act="toprompt" data-id="'+id+'">'+esc(b.toPrompt)+'</button></div>';
+      h+=det("s-"+id,esc(o.n),body);
+    });
+  });
+  return h;
+}
+
+function vUsage(){
+  var l=L(),b=l.b3,h='<h2>'+esc(l.tabs[2])+'</h2>'+instr("usage")+'<p>'+esc(b.intro)+'</p>';
+  h+='<h3>'+esc(b.howT)+'</h3><ol class="list">'+b.how.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ol>'+chips(S.cat3,"cat3");
+  subjList(S.cat3).forEach(function(s){
+    var o=SJ(s),v=V(s.tv),tp=textPrompt(s),n=words(o.x),both=tp+"\n\n"+b.textLabel+":\n"+o.x;
+    var body='<h4>'+esc(b.textT)+' <span class="badge">'+esc(l.words)+': '+n+' ('+esc(l.wordsMax)+')</span></h4><p class="src">'+esc(o.x)+'</p>'+
+      '<h4>'+esc(b.promptT)+'</h4><div class="pr">'+esc(tp)+'</div>'+
+      '<div class="btns">'+copyBtn(l.copyBoth,both,"pri")+copyBtn(l.copyText,o.x)+copyBtn(l.copyPrompt,tp)+'</div>';
+    h+=det("u-"+s.id,'<span>'+esc(o.n)+'</span><span class="badge">'+esc(cap(v.n))+'</span>',body);
+  });
+  return h+aiBlock();
+}
+
+function vBetter(){
+  var l=L(),b=l.b4,h='<h2>'+esc(l.tabs[3])+'</h2>'+instr("better");
+  h+='<h3>'+esc(b.aT)+'</h3><p>'+esc(b.aIntro)+'</p><h4>'+esc(b.ex)+'</h4><div class="chips">'+TASKS.map(function(t,i){return '<button type="button" class="chip" data-act="task" data-i="'+i+'" aria-pressed="'+(S.taskIdx===i)+'">'+(i+1)+'</button>'}).join("")+'</div>';
+  if(S.taskIdx!=null){var t=TASKS[S.taskIdx];h+='<p class="src">'+esc(t[S.lang].t)+'</p>'}
+  h+='<label class="q" for="taskIn">'+esc(b.taskLbl)+'</label><textarea id="taskIn" data-act="taskin" placeholder="'+esc(b.taskPh)+'">'+esc(S.task)+'</textarea>'+
+     '<label class="q" for="gradeIn">'+esc(b.gradeLbl)+'</label><select id="gradeIn" data-act="gradein">'+GRADES[S.lang].map(function(g,i){return '<option value="'+i+'"'+(S.grade===i?' selected':'')+'>'+esc(g)+'</option>'}).join("")+'</select>';
+  var mp=metaPrompt(S.task,GRADES[S.lang][S.grade]);
+  h+='<h4>'+esc(b.resultT)+'</h4><div class="pr" id="metaOut">'+esc(mp)+'</div><div class="btns"><button type="button" class="btn pri" data-act="copymeta">'+esc(l.copyPrompt)+'</button>';
+  if(S.taskIdx!=null)h+='<button type="button" class="btn" data-act="key" aria-expanded="'+S.showKey+'">'+esc(b.keyT)+'</button>';
+  h+='</div>';
+  if(S.taskIdx!=null&&S.showKey){var tk=TASKS[S.taskIdx];h+='<div class="instr"><b>'+esc(b.bestIs)+': '+esc(V(tk.best).n)+'</b>'+esc(tk[S.lang].w)+'</div>'}
+  h+=aiBlock();
+  h+='<h3>'+esc(b.bT)+'</h3><p>'+esc(b.bIntro)+'</p>'+chips(S.cat4,"cat4");
+  subjList(S.cat4).forEach(function(s){
+    var o=SJ(s),v=V(s.sv),p=sitPrompt(s);
+    var body='<h4>'+esc(b.sitLbl)+'</h4><p>'+esc(o.s)+'</p><h4>'+esc(l.b3.recViz)+': '+esc(v.n)+'</h4><p>'+esc(l.b2.why)+' '+esc(v.b)+'.</p><h4>'+esc(l.b3.promptT)+'</h4><div class="pr">'+esc(p)+'</div><div class="btns">'+copyBtn(l.copyPrompt,p,"pri")+'</div>';
+    h+=det("b-"+s.id,'<span>'+esc(o.n)+'</span><span class="badge">'+esc(cap(v.n))+'</span>',body);
+  });
+  return h+aiBlock();
+}
+
+function surveyUrl(){var u=(window.SURVEY_URL||"").trim();return /^https?:\/\//i.test(u)?u:""}
+function embedUrl(u){if(/docs\.google\.com\/forms/i.test(u)&&!/embedded=true/i.test(u))return u+(u.indexOf("?")>=0?"&":"?")+"embedded=true";return u}
+function fbText(){var l=L(),b=l.b5,f=S.fb;return l.b5.ansHead+"\n\n"+b.rate+": "+(f.r||"—")+"\n"+b.likert.map(function(q,i){return q+": "+(f.l[i]||"—")}).join("\n")+"\n\n"+b.open1+"\n"+(f.a||"—")+"\n\n"+b.open2+"\n"+(f.b||"—")}
+function scale(name,val,i){var s='<div class="scale" role="radiogroup" aria-label="'+esc(name)+'">';for(var n=1;n<=5;n++)s+='<button type="button" role="radio" aria-checked="'+(val===n)+'" data-act="rate" data-i="'+i+'" data-v="'+n+'">'+n+'</button>';return s+'</div>'}
+function vReview(){
+  var l=L(),b=l.b5,h='<h2>'+esc(l.tabs[4])+'</h2>'+instr("review");
+  var kd=0;b.keys.forEach(function(_,i){if(S.keys[i])kd++});
+  h+='<h3>'+esc(b.keyT)+'</h3><p>'+esc(b.keyIntro)+' <b>'+kd+' / '+b.keys.length+'</b></p><ol class="steps">'+b.keys.map(function(k,i){return '<li class="'+(S.keys[i]?'done':'')+'"><div class="num" aria-hidden="true">'+(i+1)+'</div><div><h4>'+esc(k[0])+'</h4><p>'+esc(k[1])+'</p><label class="chk"><input type="checkbox" data-act="key" data-i="'+i+'"'+(S.keys[i]?' checked':'')+'><span>'+esc(L().doneLbl)+'</span></label></div></li>'}).join("")+'</ol>';
+  /* game */
+  var gk=["flow","table","timeline","cycle","chart","labeled","venn"],ok=0;
+  h+='<h3>'+esc(b.gameT)+'</h3><p>'+esc(b.gameIntro)+'</p>';
+  gk.forEach(function(k,i){
+    var sel=S.match[i],res="";
+    if(S.matchChk){if(sel===k){ok++;res='<span class="ok">✓</span>'}else res='<span class="bad">✗</span>'}
+    h+='<div class="match"><span>'+esc(cap(V(k).b))+'</span><select data-act="match" data-i="'+i+'" aria-label="'+esc(V(k).b)+'"><option value="">'+esc(b.pick)+'</option>'+VKEYS.map(function(o){return '<option value="'+o+'"'+(sel===o?' selected':'')+'>'+esc(cap(V(o).n))+'</option>'}).join("")+'</select><span>'+res+'</span></div>';
+  });
+  h+='<div class="btns"><button type="button" class="btn pri" data-act="mcheck">'+esc(b.check)+'</button><button type="button" class="btn" data-act="mreset">'+esc(b.again)+'</button></div>';
+  if(S.matchChk)h+='<p role="status"><b>'+esc(fmt(b.score,{s:ok,t:gk.length}))+'</b></p>';
+  /* feedback */
+  h+='<h3>'+esc(b.fbT)+'</h3><p>'+esc(b.fbIntro)+'</p><h4>'+esc(b.surveyT)+'</h4>';
+  var u=surveyUrl();
+  if(u){
+    h+='<div class="btns"><a class="btn pri" href="'+esc(u)+'" target="_blank" rel="noopener noreferrer">'+esc(b.open)+'</a><button type="button" class="btn" data-act="embed" aria-expanded="'+S.embed+'">'+esc(S.embed?b.hideEmbed:b.embed)+'</button>'+copyBtn(b.copyLink,u)+'</div>';
+    if(S.embed)h+='<p class="muted">'+esc(b.embedNote)+'</p><iframe class="form" title="'+esc(b.surveyT)+'" src="'+esc(embedUrl(u))+'" loading="lazy"></iframe>';
+  }else h+='<p class="note">'+esc(b.noSurvey)+'</p>';
+  h+='<h4>'+esc(b.builtT)+'</h4><label class="q" id="rateL">'+esc(b.rate)+'</label>'+scale(b.rate,S.fb.r,"r");
+  b.likert.forEach(function(q,i){h+='<label class="q">'+esc(q)+'</label>'+scale(q,S.fb.l[i],i)});
+  h+='<label class="q" for="fa">'+esc(b.open1)+'</label><textarea id="fa" data-act="fa" placeholder="'+esc(b.ph)+'">'+esc(S.fb.a)+'</textarea><label class="q" for="fb">'+esc(b.open2)+'</label><textarea id="fb" data-act="fb" placeholder="'+esc(b.ph)+'">'+esc(S.fb.b)+'</textarea>';
+  h+='<div class="btns"><button type="button" class="btn pri" data-act="fbcopy">'+esc(b.copyAns)+'</button><button type="button" class="btn" data-act="fbclear">'+esc(b.clear)+'</button></div><p class="muted" id="fbSaved" role="status"></p>';
+  h+='<h4>'+esc(b.formT)+'</h4><ol class="list">'+b.formSteps.map(function(x){return '<li>'+esc(x)+'</li>'}).join("")+'</ol><div class="pr">'+esc(b.qList)+'</div><div class="btns">'+copyBtn(b.copyQs,b.qList)+'</div>';
+  return h;
+}
+var VIEWS={basics:vBasics,situations:vSituations,usage:vUsage,better:vBetter,review:vReview};
+
+/* ======================= RENDER ======================= */
+function pager(){
+  var i=TABS.indexOf(S.tab),l=L(),h='<div class="pager">';
+  h+=i>0?'<button type="button" class="btn" data-act="tab" data-t="'+TABS[i-1]+'">‹ '+esc(l.prev)+': '+esc(l.tabs[i-1])+'</button>':'<span></span>';
+  h+=i<TABS.length-1?'<button type="button" class="btn pri" data-act="tab" data-t="'+TABS[i+1]+'">'+esc(l.next)+': '+esc(l.tabs[i+1])+' ›</button>':'';
+  return h+'</div>';
+}
+var SUN='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+var MOON='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>';
+function isDark(){return S.theme?S.theme==="dark":(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)}
+function chrome(){
+  var l=L(),root=document.documentElement;
+  root.lang=l.code;document.title=l.title;
+  if(S.theme)root.setAttribute("data-theme",S.theme);else root.removeAttribute("data-theme");
+  $("#hTitle").textContent=l.title;$("#hSub").textContent=l.sub;$("#skip").textContent=l.skip;
+  $("#langSeg").setAttribute("aria-label",l.langLbl);
+  Array.prototype.forEach.call(document.querySelectorAll("#langSeg button"),function(b){b.setAttribute("aria-pressed",String(b.dataset.l===S.lang))});
+  var d=isDark(),tb=$("#themeBtn");tb.innerHTML=d?SUN:MOON;tb.setAttribute("aria-label",d?l.toLight:l.toDark);tb.title=d?l.toLight:l.toDark;
+  var tabs=$("#tabs");tabs.setAttribute("aria-label",l.tabsLbl);
+  tabs.innerHTML=TABS.map(function(k,i){return '<button type="button" role="tab" class="tab" id="tab-'+k+'" aria-selected="'+(k===S.tab)+'" tabindex="'+(k===S.tab?0:-1)+'" data-act="tab" data-t="'+k+'"><span class="n" aria-hidden="true">'+(i+1)+'</span>'+esc(l.tabs[i])+'</button>'}).join("");
+  var cur=document.getElementById("tab-"+S.tab);if(cur&&tabs.scrollWidth>tabs.clientWidth)tabs.scrollLeft=cur.offsetLeft-tabs.clientWidth/2+cur.offsetWidth/2;
+}
+function view(){
+  var v=$("#view");v.setAttribute("role","tabpanel");v.setAttribute("aria-labelledby","tab-"+S.tab);
+  v.innerHTML=VIEWS[S.tab]()+pager();
+  if(S.focus){var e=document.querySelector(S.focus);if(e){try{e.focus({preventScroll:true})}catch(x){e.focus()}}S.focus=null}
+}
+function render(){chrome();view()}
+function go(tab,scrollId,user){
+  if(TABS.indexOf(tab)<0)return;S.tab=tab;render();
+  try{if(location.hash!=="#"+tab)history.pushState(null,"","#"+tab)}catch(e){}
+  if(scrollId){var el=document.getElementById(scrollId);if(el)el.scrollIntoView({behavior:"smooth",block:"start"})}
+  else if(user){window.scrollTo(0,0)}
+}
+function fromHash(){var h=(location.hash||"").replace("#","");if(TABS.indexOf(h)>=0){S.tab=h;return true}return false}
+
+/* ======================= ACTIONS ======================= */
+var toastT;
+function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show")},1600)}
+function fb2(t,ok){var ta=document.createElement("textarea");ta.value=t;ta.setAttribute("readonly","");ta.style.cssText="position:fixed;opacity:0;top:0;left:0";document.body.appendChild(ta);ta.select();var r=false;try{r=document.execCommand("copy")}catch(e){}ta.remove();if(r)ok();else{try{window.prompt("Ctrl+C",t)}catch(e){}}}
+function copy(t){var ok=function(){toast(L().copied)};if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,function(){fb2(t,ok)})}else fb2(t,ok)}
+function saveFb(){store.set("fb",S.fb);var e=$("#fbSaved");if(e)e.textContent=L().b5.saved}
+
+document.addEventListener("click",function(e){
+  var b=e.target.closest("[data-act]");if(!b)return;var a=b.dataset.act,d=b.dataset;
+  switch(a){
+    case "lang":S.lang=d.l;store.set("lang",S.lang);render();break;
+    case "theme":S.theme=isDark()?"light":"dark";store.set("theme",S.theme);render();break;
+    case "tab":go(d.t,null,true);break;
+    case "copy":copy(d.t);break;
+    case "cat3":S.cat3=d.k;view();break;
+    case "cat4":S.cat4=d.k;view();break;
+    case "hint":S.hint[d.id]=!S.hint[d.id];S.focus='[data-act="hint"][data-id="'+d.id+'"]';view();break;
+    case "toprompt":S.cat4="all";S.open["b-"+d.id]=true;go("better","b-"+d.id,false);break;
+    case "task":var i=parseInt(d.i,10);S.taskIdx=i;S.task=TASKS[i][S.lang].t;S.showKey=false;view();break;
+    case "key":if(b.tagName==="BUTTON"){S.showKey=!S.showKey;S.focus='[data-act="key"]';view()}break;
+    case "copymeta":copy(metaPrompt(S.task,GRADES[S.lang][S.grade]));break;
+    case "mcheck":S.matchChk=true;view();break;
+    case "mreset":S.match={};S.matchChk=false;view();break;
+    case "embed":S.embed=!S.embed;S.focus='[data-act="embed"]';view();break;
+    case "rate":var v=parseInt(d.v,10);if(d.i==="r")S.fb.r=v;else S.fb.l[parseInt(d.i,10)]=v;store.set("fb",S.fb);S.focus='[data-act="rate"][data-i="'+d.i+'"][data-v="'+v+'"]';view();break;
+    case "fbcopy":copy(fbText());break;
+    case "fbclear":S.fb={r:0,l:[0,0,0],a:"",b:""};store.set("fb",S.fb);view();break;
+  }
+});
+document.addEventListener("change",function(e){
+  var t=e.target,a=t.dataset&&t.dataset.act;if(!a)return;
+  if(a==="alg"){S.alg[t.dataset.i]=t.checked;store.set("alg",S.alg);S.focus='[data-act="alg"][data-i="'+t.dataset.i+'"]';view()}
+  else if(a==="key"&&t.tagName==="INPUT"){S.keys[t.dataset.i]=t.checked;store.set("keys",S.keys);S.focus='[data-act="key"][data-i="'+t.dataset.i+'"]';view()}
+  else if(a==="match"){S.match[t.dataset.i]=t.value;S.matchChk=false;S.focus='[data-act="match"][data-i="'+t.dataset.i+'"]';view()}
+  else if(a==="gradein"){S.grade=parseInt(t.value,10);var o=$("#metaOut");if(o)o.textContent=metaPrompt(S.task,GRADES[S.lang][S.grade])}
+});
+document.addEventListener("input",function(e){
+  var t=e.target,a=t.dataset&&t.dataset.act;if(!a)return;
+  if(a==="taskin"){S.task=t.value;var o=$("#metaOut");if(o)o.textContent=metaPrompt(S.task,GRADES[S.lang][S.grade])}
+  else if(a==="fa"){S.fb.a=t.value;saveFb()}
+  else if(a==="fb"){S.fb.b=t.value;saveFb()}
+});
+document.addEventListener("toggle",function(e){var t=e.target;if(t&&t.tagName==="DETAILS"&&t.id)S.open[t.id]=t.open},true);
+document.addEventListener("keydown",function(e){
+  var tl=e.target.closest&&e.target.closest('[role="tablist"]');
+  if(tl&&(e.key==="ArrowRight"||e.key==="ArrowLeft")){
+    var i=TABS.indexOf(S.tab);i=e.key==="ArrowRight"?(i+1)%TABS.length:(i-1+TABS.length)%TABS.length;
+    go(TABS[i],null,false);var n=document.getElementById("tab-"+TABS[i]);if(n)n.focus();e.preventDefault();
+  }
+});
+$("#skip").addEventListener("click",function(e){e.preventDefault();$("#main").focus()});
+window.addEventListener("popstate",function(){if(fromHash())render()});
+if(window.matchMedia){try{window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",function(){if(!S.theme)chrome()})}catch(e){}}
+
+fromHash();render();
+window.__ki={S:S,T:T,SUBJ:SUBJ,VIEWS:VIEWS,render:render,go:go,TABS:TABS,textPrompt:textPrompt,sitPrompt:sitPrompt,words:words};
+})();
+</script>
+</body>
+</html>
